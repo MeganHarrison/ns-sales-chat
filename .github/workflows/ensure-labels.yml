@@ -1,0 +1,50 @@
+name: Ensure Labels
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/ensure-labels.yml"
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  ensure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const want = [
+              {name: "slice:1d", color: "1f77b4", description: "1 day slice"},
+              {name: "slice:2d", color: "ff7f0e", description: "2 day slice"},
+              {name: "slice:3d", color: "2ca02c", description: "3 day slice"},
+              {name: "needs-formatting", color: "b22222", description: "Issue is missing required fields"},
+              {name: "risk:auth", color: "b2912f", description: "Auth-related risk"},
+              {name: "risk:latency", color: "17becf", description: "Latency/perf risk"},
+              {name: "risk:secrets", color: "d62728", description: "Secrets/exposure risk"},
+              {name: "risk:data", color: "9467bd", description: "Data integrity risk"},
+              {name: "risk:availability", color: "8c564b", description: "Availability/SLO risk"},
+              {name: "triage", color: "cccccc", description: "New issues need review"},
+              {name: "priority:P0", color: "d73a4a", description: "Blocker"},
+              {name: "priority:P1", color: "fbca04", description: "High"},
+              {name: "priority:P2", color: "0e8a16", description: "Normal"},
+              {name: "priority:P3", color: "5319e7", description: "Low"},
+              {name: "size:XS", color: "bfd4f2", description: "≤0.5d"},
+              {name: "size:S", color: "c2e0c6", description: "1–2d"},
+              {name: "size:M", color: "fef2c0", description: "2–3d"},
+            ]
+
+            const { data: existing } = await github.rest.issues.listLabelsForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, per_page: 200
+            })
+            const names = new Set(existing.map(l => l.name))
+            for (const l of want) {
+              if (!names.has(l.name)) {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner, repo: context.repo.repo, name: l.name, color: l.color, description: l.description
+                })
+              }
+            }

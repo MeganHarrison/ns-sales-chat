@@ -1,0 +1,22 @@
+name = "webhook-handler"
+compatibility_date = "2025-09-13"
+main = "src/index.ts"
+
+[observability]
+enabled = true
+
+# Service binding to sync-coordinator
+[[services]]
+binding = "SYNC_COORDINATOR"
+service = "sync-coordinator"
+
+# Environment variables for development
+[vars]
+ENVIRONMENT = "development"
+
+# Production environment configuration
+[env.production.vars]
+ENVIRONMENT = "production"
+
+[env.production.services]
+SYNC_COORDINATOR = "sync-coordinator"

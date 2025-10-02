@@ -1,0 +1,37 @@
+name = "sync-coordinator"
+compatibility_date = "2025-09-13"
+main = "src/index.ts"
+
+[observability]
+enabled = true
+
+# Durable Objects for OAuth token management and sync coordination
+[[durable_objects.bindings]]
+name = "SYNC_COORDINATOR"
+class_name = "SyncCoordinator"
+script_name = "sync-coordinator"
+
+# KV namespace for sync metadata caching
+[[kv_namespaces]]
+binding = "SYNC_CACHE"
+id = "your-kv-namespace-id"
+preview_id = "your-kv-namespace-preview-id"
+
+# Hyperdrive binding for optimized Supabase connections
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "your-hyperdrive-config-id"
+
+# Environment variables for development
+[vars]
+ENVIRONMENT = "development"
+
+# Production environment configuration
+[env.production.vars]
+ENVIRONMENT = "production"
+
+[env.production.kv_namespaces]
+SYNC_CACHE = "your-production-kv-namespace-id"
+
+[env.production.hyperdrive]
+HYPERDRIVE = "your-production-hyperdrive-config-id"

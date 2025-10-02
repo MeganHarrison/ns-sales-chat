@@ -1,0 +1,175 @@
+services:
+  # AI Agent API Service with Sync Monitoring
+  agent-api:
+    build: ./backend_agent_api
+    container_name: dynamous-agent-api
+    restart: always
+    ports:
+      - "8001:8001"
+    environment:
+      # LLM Configuration
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
+      - LLM_BASE_URL=${LLM_BASE_URL:-https://api.openai.com/v1}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - LLM_CHOICE=${LLM_CHOICE:-gpt-4o-mini}
+      - VISION_LLM_CHOICE=${VISION_LLM_CHOICE:-gpt-4o-mini}
+      # Embedding Configuration
+      - EMBEDDING_PROVIDER=${EMBEDDING_PROVIDER:-openai}
+      - EMBEDDING_BASE_URL=${EMBEDDING_BASE_URL:-https://api.openai.com/v1}
+      - EMBEDDING_API_KEY=${EMBEDDING_API_KEY}
+      - EMBEDDING_MODEL_CHOICE=${EMBEDDING_MODEL_CHOICE:-text-embedding-3-small}
+      # Database Configuration
+      - DATABASE_URL=${DATABASE_URL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      # Web Search Configuration
+      - BRAVE_API_KEY=${BRAVE_API_KEY}
+      - SEARXNG_BASE_URL=${SEARXNG_BASE_URL}
+      # Agent Observability Configuration (optional)
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY}
+      - LANGFUSE_HOST=${LANGFUSE_HOST:-https://cloud.langfuse.com}
+      # Keap Sync Configuration
+      - KEAP_CLIENT_ID=${KEAP_CLIENT_ID}
+      - KEAP_CLIENT_SECRET=${KEAP_CLIENT_SECRET}
+      - KEAP_WEBHOOK_SECRET=${KEAP_WEBHOOK_SECRET}
+      - SYNC_COORDINATOR_URL=${SYNC_COORDINATOR_URL:-https://sync-coordinator.your-subdomain.workers.dev}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - postgres
+
+  # RAG Pipeline Service
+  rag-pipeline:
+    build: ./backend_rag_pipeline
+    container_name: dynamous-rag-pipeline
+    restart: always
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      # Pipeline Configuration
+      - RAG_PIPELINE_TYPE=${RAG_PIPELINE_TYPE:-local}
+      - RUN_MODE=${RUN_MODE:-continuous}
+      - RAG_PIPELINE_ID=${RAG_PIPELINE_ID}
+      # Database Configuration (same as agent)
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      # Embedding Configuration (same as agent)
+      - EMBEDDING_BASE_URL=${EMBEDDING_BASE_URL:-https://api.openai.com/v1}
+      - EMBEDDING_API_KEY=${EMBEDDING_API_KEY}
+      - EMBEDDING_MODEL_CHOICE=${EMBEDDING_MODEL_CHOICE:-text-embedding-3-small}
+      # Google Drive Configuration
+      - GOOGLE_DRIVE_CREDENTIALS_JSON=${GOOGLE_DRIVE_CREDENTIALS_JSON}
+      - RAG_WATCH_FOLDER_ID=${RAG_WATCH_FOLDER_ID}
+      # Local Files Configuration
+      - RAG_WATCH_DIRECTORY=${RAG_WATCH_DIRECTORY}
+    volumes:
+      # Mount local files directory for local pipeline
+      - ./rag-documents:/app/Local_Files/data
+      # Mount Google Drive credentials if using OAuth2 (optional)
+      - ./google-credentials:/app/Google_Drive/credentials
+
+  # Next.js Frontend with Keap Sync Dashboard
+  frontend:
+    build:
+      context: ./frontend_nextjs
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_AGENT_ENDPOINT: ${NEXT_PUBLIC_AGENT_ENDPOINT:-http://agent-api:8001}
+        NEXT_PUBLIC_SYNC_COORDINATOR_URL: ${NEXT_PUBLIC_SYNC_COORDINATOR_URL}
+    container_name: dynamous-frontend-nextjs
+    restart: always
+    ports:
+      - "8082:3000"
+    environment:
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - NEXT_PUBLIC_AGENT_ENDPOINT=${NEXT_PUBLIC_AGENT_ENDPOINT:-http://agent-api:8001}
+      - NEXT_PUBLIC_SYNC_COORDINATOR_URL=${NEXT_PUBLIC_SYNC_COORDINATOR_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - agent-api
+      - postgres
+
+  # PostgreSQL Database for Sync Operations
+  postgres:
+    image: postgres:15-alpine
+    container_name: dynamous-postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-keap_sync}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-keap_sync}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Cloudflare Workers Proxy (for local development)
+  workers-proxy:
+    image: nginx:alpine
+    container_name: dynamous-workers-proxy
+    restart: always
+    ports:
+      - "8083:80"
+    volumes:
+      - ./nginx-workers.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - postgres
+    environment:
+      - SYNC_COORDINATOR_URL=${SYNC_COORDINATOR_URL}
+      - WEBHOOK_HANDLER_URL=${WEBHOOK_HANDLER_URL}
+      - SYNC_WORKER_URL=${SYNC_WORKER_URL}
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Sync Monitoring Service (optional for advanced monitoring)
+  sync-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile.sync-monitor
+    container_name: dynamous-sync-monitor
+    restart: always
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - SYNC_COORDINATOR_URL=${SYNC_COORDINATOR_URL}
+      - KEAP_CLIENT_ID=${KEAP_CLIENT_ID}
+    depends_on:
+      - postgres
+    volumes:
+      - sync_logs:/app/logs
+    profiles:
+      - monitoring
+
+volumes:
+  rag-documents:
+  postgres_data:
+  sync_logs:
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

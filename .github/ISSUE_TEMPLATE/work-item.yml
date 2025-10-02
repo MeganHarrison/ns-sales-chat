@@ -1,0 +1,118 @@
+name: 🧩 Work Item
+description: Create a small, demo-able ticket (no epics).
+title: "[Type] <concise outcome>"
+labels:
+  - triage
+assignees:
+  - claude
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - Feature
+        - Bug
+        - Chore
+        - Docs
+        - Security
+        - Tests
+        - Observability
+    validations:
+      required: true
+
+  - type: input
+    id: initiative
+    attributes:
+      label: Initiative label
+      description: "Example: initiative:cloudflare-workers-foundation"
+      placeholder: "initiative:my-initiative"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      description: "Limit to M (≤3 days). Split if larger."
+      options:
+        - XS (≤0.5d)
+        - S (1–2d)
+        - M (2–3d)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0 (blocker)
+        - P1 (high)
+        - P2 (normal)
+        - P3 (low)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: risk_tags
+    attributes:
+      label: Risk tags (select any that apply)
+      options:
+        - label: risk:auth
+        - label: risk:latency
+        - label: risk:secrets
+        - label: risk:data
+        - label: risk:availability
+
+  - type: dropdown
+    id: slice
+    attributes:
+      label: Burndown slice
+      description: "Add a slice label to visualize cycle time."
+      options:
+        - slice:1d
+        - slice:2d
+        - slice:3d
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      placeholder: "Why this matters in 1–3 sentences."
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope (This Issue Only)
+      placeholder: "- What WILL be delivered (bullet list)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of Scope
+      placeholder: "- What will NOT be delivered (bullet list)"
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: "Use checkboxes so the linter can verify."
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+    validations:
+      required: true
+
+  - type: textarea
+    id: testing
+    attributes:
+      label: Testing
+      placeholder: "- Unit / Integration checks to add"

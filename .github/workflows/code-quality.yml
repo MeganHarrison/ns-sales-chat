@@ -1,0 +1,90 @@
+name: Code Quality with Claude
+
+on:
+  schedule:
+    # Run weekly code quality review
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      focus_area:
+        description: 'Focus area for code review'
+        required: false
+        default: 'overall'
+        type: choice
+        options:
+          - overall
+          - security
+          - performance
+          - maintainability
+          - documentation
+
+jobs:
+  code-quality-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Claude Code Quality Review
+        uses: anthropics/claude-code-action@main
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Please perform a comprehensive code quality review focusing on ${{ github.event.inputs.focus_area || 'overall' }} improvements.
+            
+            Analyze the codebase for:
+            - Code organization and structure
+            - Performance optimizations
+            - Security best practices
+            - Documentation quality
+            - Technical debt
+            - Unused code or dependencies
+            
+            Create issues for any significant improvements needed and suggest specific actionable fixes.
+
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Audit frontend dependencies
+        working-directory: ./frontend_nextjs
+        run: |
+          npm audit --audit-level moderate
+        continue-on-error: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Audit Python dependencies
+        working-directory: ./backend_agent_api
+        run: |
+          pip install safety
+          safety check -r requirements.txt
+        continue-on-error: true
+
+      - name: Claude Dependency Review
+        if: always()
+        uses: anthropics/claude-code-action@main
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Please review the dependency audit results above and:
+            1. Identify any security vulnerabilities that need immediate attention
+            2. Suggest updates for outdated packages
+            3. Recommend removing any unused dependencies
+            4. Create a prioritized action plan for dependency maintenance

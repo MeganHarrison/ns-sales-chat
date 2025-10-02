@@ -1,0 +1,199 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - heading "Keap Sync" [level=1] [ref=e7]
+          - navigation [ref=e8]:
+            - link "Dashboard" [ref=e9] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Conflicts" [ref=e10] [cursor=pointer]:
+              - /url: /dashboard/conflicts
+            - link "Settings" [ref=e11] [cursor=pointer]:
+              - /url: /dashboard/settings
+        - generic [ref=e12]:
+          - text: "Sync System Status:"
+          - generic [ref=e13]: Online
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - heading "Keap-Supabase Sync Dashboard" [level=1] [ref=e17]
+          - paragraph [ref=e18]: Monitor and manage your bidirectional sync operations
+        - generic [ref=e19]:
+          - button "Sync All" [ref=e20]
+          - button "Sync Contacts" [ref=e21]
+          - button "Setup OAuth" [ref=e22]
+      - generic [ref=e24]:
+        - generic [ref=e26]: ⚠️
+        - generic [ref=e27]:
+          - heading "2 Sync Conflicts Need Resolution" [level=3] [ref=e28]
+          - generic [ref=e29]:
+            - paragraph [ref=e30]: "There are 2 pending sync conflicts that require manual resolution:"
+            - list [ref=e31]:
+              - listitem [ref=e32]:
+                - text: "contacts - ID: contact_123"
+                - generic [ref=e34]: (2 fields)
+              - listitem [ref=e35]:
+                - text: "orders - ID: order_456"
+                - generic [ref=e37]: (1 field)
+          - link "Resolve conflicts →" [ref=e39] [cursor=pointer]:
+            - /url: /dashboard/conflicts
+      - generic [ref=e40]:
+        - generic [ref=e41]:
+          - heading "Total Contacts" [level=3] [ref=e43]
+          - generic [ref=e46]:
+            - generic [ref=e47]: 1,250
+            - paragraph [ref=e48]: Synced contacts
+            - paragraph [ref=e49]: +12% from last month
+        - generic [ref=e50]:
+          - heading "Total Orders" [level=3] [ref=e52]
+          - generic [ref=e55]:
+            - generic [ref=e56]: "340"
+            - paragraph [ref=e57]: Synced orders
+            - paragraph [ref=e58]: +8% from last month
+        - generic [ref=e59]:
+          - heading "Total Revenue" [level=3] [ref=e61]
+          - generic [ref=e64]:
+            - generic [ref=e65]: $15,670.5
+            - paragraph [ref=e66]: From synced orders
+            - paragraph [ref=e67]: "Avg: $46"
+        - generic [ref=e68]:
+          - heading "Sync Health" [level=3] [ref=e70]
+          - generic [ref=e73]:
+            - generic [ref=e74]: 95%
+            - paragraph [ref=e75]: System reliability
+            - paragraph [ref=e76]: "Last sync: less than a minute ago"
+      - generic [ref=e77]:
+        - tablist [ref=e78]:
+          - tab "Overview" [selected] [ref=e79]
+          - tab "Contacts" [ref=e80]
+          - tab "Orders" [ref=e81]
+          - tab "Sync Health" [ref=e82]
+        - tabpanel "Overview" [ref=e83]:
+          - generic [ref=e84]:
+            - generic [ref=e85]:
+              - generic [ref=e86]:
+                - heading "Sync Performance" [level=3] [ref=e87]
+                - paragraph [ref=e88]: Real-time sync metrics and trends
+              - generic [ref=e90]:
+                - application [ref=e93]:
+                  - generic [ref=e98]:
+                    - generic [ref=e101]: 9/12/2025
+                    - generic [ref=e104]: 9/13/2025
+                    - generic [ref=e107]: 9/14/2025
+                    - generic [ref=e110]: 9/15/2025
+                    - generic [ref=e113]: 9/16/2025
+                    - generic [ref=e116]: 9/17/2025
+                    - generic [ref=e119]: 9/18/2025
+                - generic [ref=e120]:
+                  - generic [ref=e121]: Contacts
+                  - generic [ref=e123]: Orders
+                  - generic [ref=e125]: Tags
+                  - generic [ref=e127]: Subscriptions
+            - generic [ref=e129]:
+              - generic [ref=e130]:
+                - heading "Sync Health" [level=3] [ref=e131]
+                - paragraph [ref=e132]: System health and reliability metrics
+              - generic [ref=e134]:
+                - application [ref=e137]
+                - generic [ref=e144]:
+                  - generic [ref=e145]: 95%
+                  - generic [ref=e146]: Overall Health Score
+                  - generic [ref=e147]:
+                    - generic [ref=e148]: Successful
+                    - generic [ref=e150]: Failed
+                  - generic [ref=e153]: ⚠️ 2 pending conflicts need resolution
+          - generic [ref=e154]:
+            - generic [ref=e155]:
+              - heading "Recent Sync Activities" [level=3] [ref=e156]
+              - paragraph [ref=e157]: Latest synchronization operations and their status
+            - generic [ref=e159]:
+              - generic [ref=e160]:
+                - generic [ref=e163]:
+                  - generic [ref=e164]: contacts Sync
+                  - generic [ref=e165]: "ID:"
+                - generic [ref=e166]:
+                  - generic [ref=e167]: 7 minutes ago
+                  - generic [ref=e168]: Conflict resolved
+              - generic [ref=e169]:
+                - generic [ref=e172]:
+                  - generic [ref=e173]: orders Sync
+                  - generic [ref=e174]: "ID:"
+                - generic [ref=e175]:
+                  - generic [ref=e176]: 38 minutes ago
+                  - generic [ref=e177]: Conflict pending
+              - generic [ref=e178]:
+                - generic [ref=e181]:
+                  - generic [ref=e182]: products Sync
+                  - generic [ref=e183]: "ID:"
+                - generic [ref=e184]:
+                  - generic [ref=e185]: about 1 hour ago
+                  - generic [ref=e186]: Conflict resolved
+              - generic [ref=e187]:
+                - generic [ref=e190]:
+                  - generic [ref=e191]: contacts Sync
+                  - generic [ref=e192]: "ID:"
+                - generic [ref=e193]:
+                  - generic [ref=e194]: about 1 hour ago
+                  - generic [ref=e195]: Conflict resolved
+              - generic [ref=e196]:
+                - generic [ref=e199]:
+                  - generic [ref=e200]: orders Sync
+                  - generic [ref=e201]: "ID:"
+                - generic [ref=e202]:
+                  - generic [ref=e203]: about 1 hour ago
+                  - generic [ref=e204]: Conflict resolved
+              - generic [ref=e205]:
+                - generic [ref=e208]:
+                  - generic [ref=e209]: products Sync
+                  - generic [ref=e210]: "ID:"
+                - generic [ref=e211]:
+                  - generic [ref=e212]: about 1 hour ago
+                  - generic [ref=e213]: Conflict resolved
+              - generic [ref=e214]:
+                - generic [ref=e217]:
+                  - generic [ref=e218]: contacts Sync
+                  - generic [ref=e219]: "ID:"
+                - generic [ref=e220]:
+                  - generic [ref=e221]: about 2 hours ago
+                  - generic [ref=e222]: Conflict resolved
+              - generic [ref=e223]:
+                - generic [ref=e226]:
+                  - generic [ref=e227]: orders Sync
+                  - generic [ref=e228]: "ID:"
+                - generic [ref=e229]:
+                  - generic [ref=e230]: about 2 hours ago
+                  - generic [ref=e231]: Conflict resolved
+              - generic [ref=e232]:
+                - generic [ref=e235]:
+                  - generic [ref=e236]: products Sync
+                  - generic [ref=e237]: "ID:"
+                - generic [ref=e238]:
+                  - generic [ref=e239]: about 2 hours ago
+                  - generic [ref=e240]: Conflict resolved
+              - generic [ref=e241]:
+                - generic [ref=e244]:
+                  - generic [ref=e245]: contacts Sync
+                  - generic [ref=e246]: "ID:"
+                - generic [ref=e247]:
+                  - generic [ref=e248]: about 3 hours ago
+                  - generic [ref=e249]: Conflict resolved
+  - generic [ref=e254] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e255] [cursor=pointer]:
+      - img [ref=e256] [cursor=pointer]
+    - generic [ref=e259] [cursor=pointer]:
+      - button "Open issues overlay" [ref=e260] [cursor=pointer]:
+        - generic [ref=e261] [cursor=pointer]:
+          - generic [ref=e262] [cursor=pointer]: "2"
+          - generic [ref=e263] [cursor=pointer]: "3"
+        - generic [ref=e264] [cursor=pointer]:
+          - text: Issue
+          - generic [ref=e265] [cursor=pointer]: s
+      - button "Collapse issues badge" [ref=e266] [cursor=pointer]:
+        - img [ref=e267] [cursor=pointer]
+  - alert [ref=e269]
+  - generic [ref=e270]: 9/12/2025
+```

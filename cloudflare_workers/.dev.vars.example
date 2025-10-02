@@ -1,0 +1,12 @@
+# Cloudflare Workers Development Variables
+# Copy this file to .dev.vars and fill in your actual values
+
+# AI API Keys
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+
+# Database (if using)
+DATABASE_URL=
+
+# Other Services
+INTERCOM_ACCESS_TOKEN=

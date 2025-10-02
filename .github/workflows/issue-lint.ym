@@ -1,0 +1,105 @@
+name: Issue Lint
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate issue fields & sync labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue
+            const body = issue.body || ""
+
+            // Helpers
+            const has = (re) => re.test(body)
+            const extractAll = (re) => {
+              const m = [...body.matchAll(re)].map(x => x[1].trim())
+              return [...new Set(m)]
+            }
+
+            // Required sections (by headings rendered from form)
+            const missing = []
+            if (!has(/### Size\\n/i)) missing.push("Size")
+            if (!has(/### Priority\\n/i)) missing.push("Priority")
+            if (!has(/### Initiative label\\n/i)) missing.push("Initiative label")
+            if (!has(/### Acceptance Criteria\\n/i)) missing.push("Acceptance Criteria")
+            if (!has(/- \\[ \\]/)) missing.push("At least one checkbox in Acceptance Criteria")
+
+            // Read initiative label value
+            const initiative = extractAll(/### Initiative label\\n\\n(.+?)\\n/gi)[0]
+            // Read slice dropdown
+            const slice = extractAll(/### Burndown slice\\n\\n(.+?)\\n/gi)[0]
+            // Read risk tags (checkboxes)
+            const risks = extractAll(/- \\[x\\] (risk:[^\\n]+)/gi)
+
+            // Map size to label
+            const sizeMatch = extractAll(/### Size\\n\\n(.+?)\\n/gi)[0]
+            let sizeLabel = null
+            if (sizeMatch?.includes("XS")) sizeLabel = "XS"
+            else if (sizeMatch?.includes("S (1–2d)")) sizeLabel = "S"
+            else if (sizeMatch?.includes("M (2–3d)")) sizeLabel = "M"
+
+            // Map priority to label
+            const priMatch = extractAll(/### Priority\\n\\n(.+?)\\n/gi)[0]
+            let priLabel = null
+            if (priMatch?.startsWith("P0")) priLabel = "P0"
+            else if (priMatch?.startsWith("P1")) priLabel = "P1"
+            else if (priMatch?.startsWith("P2")) priLabel = "P2"
+            else if (priMatch?.startsWith("P3")) priLabel = "P3"
+
+            // Build desired labels (keep existing)
+            const desired = new Set(issue.labels.map(l => l.name))
+            if (initiative) desired.add(initiative)
+            if (slice) desired.add(slice)
+            if (sizeLabel) desired.add(`size:${sizeLabel}`)
+            if (priLabel) desired.add(`priority:${priLabel}`)
+            for (const r of risks) desired.add(r)
+
+            // Apply labels
+            await github.rest.issues.setLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              labels: Array.from(desired)
+            })
+
+            if (missing.length) {
+              // Add needs-formatting and comment with reasons
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ["needs-formatting"]
+              })
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `❌ Issue form is missing:\n- ${missing.join("\n- ")}\n\nPlease edit the issue to fix these.`
+              })
+              core.setFailed("Issue missing required content.")
+            } else {
+              // Remove needs-formatting if present
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  name: "needs-formatting"
+                })
+              } catch {}
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: "✅ Issue validated and labels synced."
+              })
+            }

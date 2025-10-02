@@ -1,0 +1,29 @@
+name: Issue Auto-linking
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+
+jobs:
+  relate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cross-reference related issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue
+            const body = issue.body || ""
+            const refs = new Set((body.match(/#\d+/g) || []).map(s => parseInt(s.slice(1), 10)))
+            for (const n of refs) {
+              if (n === issue.number) continue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: n,
+                body: `🔗 Relates to #${issue.number}`
+              })
+            }

@@ -1,0 +1,403 @@
+# Sync Monitor Service - Advanced monitoring for Keap-Supabase sync operations
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create sync monitor application
+COPY <<EOF /app/requirements.txt
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+httpx==0.25.2
+python-crontab==3.0.0
+psycopg2-binary==2.9.9
+asyncpg==0.29.0
+sqlalchemy[asyncio]==2.0.23
+prometheus-client==0.19.0
+structlog==23.2.0
+EOF
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Create the sync monitor application
+COPY <<EOF /app/sync_monitor.py
+import asyncio
+import logging
+import httpx
+import json
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+from pydantic_settings import BaseSettings
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import text
+from prometheus_client import Counter, Histogram, Gauge, generate_latest
+import structlog
+
+# Configuration
+class Settings(BaseSettings):
+    database_url: str
+    supabase_url: str
+    supabase_service_key: str
+    sync_coordinator_url: str
+    keap_client_id: str
+    log_level: str = "INFO"
+    monitor_interval_minutes: int = 5
+    
+    class Config:
+        env_file = ".env"
+
+settings = Settings()
+
+# Structured logging
+structlog.configure(
+    processors=[
+        structlog.stdlib.filter_by_level,
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+        structlog.processors.UnicodeDecoder(),
+        structlog.processors.JSONRenderer()
+    ],
+    context_class=dict,
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    wrapper_class=structlog.stdlib.BoundLogger,
+    cache_logger_on_first_use=True,
+)
+
+logger = structlog.get_logger()
+
+# Prometheus metrics
+sync_operations_total = Counter('sync_operations_total', 'Total sync operations', ['entity_type', 'direction', 'status'])
+sync_duration_seconds = Histogram('sync_duration_seconds', 'Sync operation duration')
+conflicts_total = Counter('conflicts_total', 'Total conflicts detected', ['entity_type'])
+sync_health_score = Gauge('sync_health_score', 'Overall sync system health score (0-100)')
+oauth_token_expiry = Gauge('oauth_token_expiry_timestamp', 'OAuth token expiry timestamp')
+
+# FastAPI app
+app = FastAPI(title="Keap Sync Monitor", version="1.0.0")
+
+# Database connection
+engine = create_async_engine(settings.database_url, echo=False)
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+class SyncHealthReport(BaseModel):
+    timestamp: datetime
+    overall_health_score: float = Field(..., ge=0, le=100)
+    sync_status: str
+    last_successful_sync: Optional[datetime]
+    pending_conflicts: int
+    recent_errors: List[str]
+    oauth_status: str
+    oauth_expires_in_hours: Optional[float]
+    entity_stats: Dict[str, Any]
+    recommendations: List[str]
+
+class MonitoringService:
+    def __init__(self):
+        self.http_client = httpx.AsyncClient(timeout=30.0)
+    
+    async def check_sync_health(self) -> SyncHealthReport:
+        """Comprehensive health check of the sync system"""
+        try:
+            async with AsyncSessionLocal() as session:
+                # Get sync statistics
+                sync_stats = await self._get_sync_statistics(session)
+                conflicts = await self._get_pending_conflicts(session)
+                recent_errors = await self._get_recent_errors(session)
+                oauth_status = await self._check_oauth_status()
+                
+                # Calculate health score
+                health_score = self._calculate_health_score(
+                    sync_stats, conflicts, recent_errors, oauth_status
+                )
+                
+                # Generate recommendations
+                recommendations = self._generate_recommendations(
+                    sync_stats, conflicts, recent_errors, oauth_status
+                )
+                
+                report = SyncHealthReport(
+                    timestamp=datetime.utcnow(),
+                    overall_health_score=health_score,
+                    sync_status="healthy" if health_score >= 80 else "degraded" if health_score >= 60 else "unhealthy",
+                    last_successful_sync=sync_stats.get('last_successful_sync'),
+                    pending_conflicts=len(conflicts),
+                    recent_errors=[str(e) for e in recent_errors[-5:]],  # Last 5 errors
+                    oauth_status=oauth_status.get('status', 'unknown'),
+                    oauth_expires_in_hours=oauth_status.get('expires_in_hours'),
+                    entity_stats=sync_stats.get('entity_stats', {}),
+                    recommendations=recommendations
+                )
+                
+                # Update Prometheus metrics
+                sync_health_score.set(health_score)
+                if oauth_status.get('expires_at'):
+                    oauth_token_expiry.set(oauth_status['expires_at'].timestamp())
+                
+                return report
+                
+        except Exception as e:
+            logger.error("Health check failed", error=str(e))
+            raise HTTPException(status_code=500, detail=f"Health check failed: {str(e)}")
+    
+    async def _get_sync_statistics(self, session: AsyncSession) -> Dict[str, Any]:
+        """Get sync operation statistics from database"""
+        query = text("""
+            SELECT 
+                entity_type,
+                COUNT(*) as total_operations,
+                MAX(last_synced_at) as last_sync,
+                COUNT(CASE WHEN created_at > NOW() - INTERVAL '24 hours' THEN 1 END) as operations_24h
+            FROM sync_contacts 
+            GROUP BY entity_type
+            
+            UNION ALL
+            
+            SELECT 
+                'orders' as entity_type,
+                COUNT(*) as total_operations,
+                MAX(last_synced_at) as last_sync,
+                COUNT(CASE WHEN created_at > NOW() - INTERVAL '24 hours' THEN 1 END) as operations_24h
+            FROM sync_orders
+        """)
+        
+        result = await session.execute(query)
+        rows = result.fetchall()
+        
+        entity_stats = {}
+        last_successful_sync = None
+        
+        for row in rows:
+            entity_stats[row.entity_type] = {
+                'total_operations': row.total_operations,
+                'operations_24h': row.operations_24h
+            }
+            if row.last_sync and (not last_successful_sync or row.last_sync > last_successful_sync):
+                last_successful_sync = row.last_sync
+        
+        return {
+            'entity_stats': entity_stats,
+            'last_successful_sync': last_successful_sync
+        }
+    
+    async def _get_pending_conflicts(self, session: AsyncSession) -> List[Dict[str, Any]]:
+        """Get pending sync conflicts"""
+        query = text("""
+            SELECT id, entity_type, entity_id, conflict_fields, created_at 
+            FROM sync_conflicts 
+            WHERE resolved_at IS NULL 
+            ORDER BY created_at DESC 
+            LIMIT 50
+        """)
+        
+        result = await session.execute(query)
+        return [dict(row._mapping) for row in result.fetchall()]
+    
+    async def _get_recent_errors(self, session: AsyncSession) -> List[Dict[str, Any]]:
+        """Get recent sync errors from logs"""
+        query = text("""
+            SELECT error_message, error_type, created_at, entity_type
+            FROM sync_logs 
+            WHERE log_level = 'ERROR' 
+                AND created_at > NOW() - INTERVAL '24 hours'
+            ORDER BY created_at DESC 
+            LIMIT 10
+        """)
+        
+        result = await session.execute(query)
+        return [dict(row._mapping) for row in result.fetchall()]
+    
+    async def _check_oauth_status(self) -> Dict[str, Any]:
+        """Check OAuth token status from Sync Coordinator"""
+        try:
+            response = await self.http_client.get(
+                f"{settings.sync_coordinator_url}/oauth/status",
+                headers={"X-Client-Id": settings.keap_client_id}
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                expires_at = datetime.fromisoformat(data.get('expires_at', ''))
+                expires_in_hours = (expires_at - datetime.utcnow()).total_seconds() / 3600
+                
+                return {
+                    'status': 'valid' if expires_in_hours > 1 else 'expiring_soon' if expires_in_hours > 0 else 'expired',
+                    'expires_at': expires_at,
+                    'expires_in_hours': expires_in_hours
+                }
+            else:
+                return {'status': 'error', 'error': f"HTTP {response.status_code}"}
+                
+        except Exception as e:
+            logger.error("OAuth status check failed", error=str(e))
+            return {'status': 'unknown', 'error': str(e)}
+    
+    def _calculate_health_score(self, sync_stats: Dict, conflicts: List, errors: List, oauth_status: Dict) -> float:
+        """Calculate overall system health score (0-100)"""
+        score = 100.0
+        
+        # Deduct for pending conflicts
+        if conflicts:
+            score -= min(len(conflicts) * 2, 30)  # Max 30 points for conflicts
+        
+        # Deduct for recent errors
+        if errors:
+            score -= min(len(errors) * 5, 40)  # Max 40 points for errors
+        
+        # Deduct for OAuth issues
+        oauth_health = oauth_status.get('status', 'unknown')
+        if oauth_health == 'expired':
+            score -= 50
+        elif oauth_health == 'expiring_soon':
+            score -= 20
+        elif oauth_health in ['error', 'unknown']:
+            score -= 30
+        
+        # Deduct for stale syncs
+        last_sync = sync_stats.get('last_successful_sync')
+        if last_sync:
+            hours_since_sync = (datetime.utcnow() - last_sync).total_seconds() / 3600
+            if hours_since_sync > 24:
+                score -= 25
+            elif hours_since_sync > 6:
+                score -= 10
+        else:
+            score -= 50  # No successful sync ever
+        
+        return max(0.0, score)
+    
+    def _generate_recommendations(self, sync_stats: Dict, conflicts: List, errors: List, oauth_status: Dict) -> List[str]:
+        """Generate actionable recommendations based on system health"""
+        recommendations = []
+        
+        if conflicts:
+            recommendations.append(f"Resolve {len(conflicts)} pending conflicts in the dashboard")
+        
+        if errors:
+            recommendations.append("Investigate recent sync errors and address root causes")
+        
+        oauth_health = oauth_status.get('status', 'unknown')
+        if oauth_health == 'expired':
+            recommendations.append("OAuth token has expired - re-authenticate with Keap immediately")
+        elif oauth_health == 'expiring_soon':
+            recommendations.append("OAuth token expires soon - consider refreshing proactively")
+        
+        last_sync = sync_stats.get('last_successful_sync')
+        if last_sync:
+            hours_since_sync = (datetime.utcnow() - last_sync).total_seconds() / 3600
+            if hours_since_sync > 24:
+                recommendations.append("No successful sync in 24+ hours - check system connectivity")
+        
+        entity_stats = sync_stats.get('entity_stats', {})
+        for entity_type, stats in entity_stats.items():
+            if stats.get('operations_24h', 0) == 0:
+                recommendations.append(f"No {entity_type} sync operations in 24h - verify configuration")
+        
+        if not recommendations:
+            recommendations.append("System is healthy - no immediate actions required")
+        
+        return recommendations
+
+# Global monitoring service instance
+monitor = MonitoringService()
+
+@app.get("/health")
+async def health_check():
+    """Basic health check endpoint"""
+    return {"status": "healthy", "timestamp": datetime.utcnow()}
+
+@app.get("/health/detailed", response_model=SyncHealthReport)
+async def detailed_health_check():
+    """Comprehensive health check with recommendations"""
+    return await monitor.check_sync_health()
+
+@app.get("/metrics")
+async def metrics():
+    """Prometheus metrics endpoint"""
+    return generate_latest()
+
+@app.post("/alerts/webhook")
+async def receive_alert_webhook(payload: Dict[str, Any]):
+    """Receive webhook alerts from external systems"""
+    logger.info("Received alert webhook", payload=payload)
+    
+    # Process alert and update metrics
+    alert_type = payload.get('type', 'unknown')
+    if alert_type == 'sync_error':
+        sync_operations_total.labels(
+            entity_type=payload.get('entity_type', 'unknown'),
+            direction=payload.get('direction', 'unknown'),
+            status='error'
+        ).inc()
+    
+    return {"status": "received"}
+
+# Background monitoring task
+async def background_monitoring():
+    """Background task that runs periodic health checks"""
+    while True:
+        try:
+            logger.info("Running background health check")
+            report = await monitor.check_sync_health()
+            
+            # Log critical issues
+            if report.overall_health_score < 60:
+                logger.warning("Sync system health degraded", health_score=report.overall_health_score)
+            
+            # Save health report to database for historical tracking
+            async with AsyncSessionLocal() as session:
+                await session.execute(text("""
+                    INSERT INTO sync_health_reports (timestamp, health_score, sync_status, report_data)
+                    VALUES (:timestamp, :health_score, :sync_status, :report_data)
+                """), {
+                    'timestamp': report.timestamp,
+                    'health_score': report.overall_health_score,
+                    'sync_status': report.sync_status,
+                    'report_data': report.model_dump_json()
+                })
+                await session.commit()
+            
+        except Exception as e:
+            logger.error("Background monitoring failed", error=str(e))
+        
+        # Wait for next monitoring interval
+        await asyncio.sleep(settings.monitor_interval_minutes * 60)
+
+@app.on_event("startup")
+async def startup_event():
+    """Start background monitoring task"""
+    asyncio.create_task(background_monitoring())
+    logger.info("Sync Monitor started", config=settings.model_dump())
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_config=None)
+EOF
+
+# Copy the application
+COPY /app/sync_monitor.py /app/
+
+# Create logs directory
+RUN mkdir -p /app/logs
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Expose port
+EXPOSE 8000
+
+# Run the application
+CMD ["python", "sync_monitor.py"]

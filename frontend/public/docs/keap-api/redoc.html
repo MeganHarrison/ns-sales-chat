@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keap API - Redoc Documentation</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        #redoc-container {
+            height: 100vh;
+        }
+        .custom-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .custom-header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 600;
+        }
+        .custom-header p {
+            margin: 10px 0 0 0;
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 400px;
+            font-size: 20px;
+            color: #666;
+        }
+        .error-container {
+            padding: 40px;
+            text-align: center;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 40px auto;
+        }
+        .error-container h2 {
+            color: #d32f2f;
+            margin-bottom: 20px;
+        }
+        .file-input {
+            margin: 20px 0;
+            padding: 10px;
+            border: 2px dashed #ddd;
+            border-radius: 4px;
+            background: #fafafa;
+        }
+        #file-upload {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #file-upload:hover {
+            background: #5a67d8;
+        }
+        .quick-links {
+            background: #f5f5f5;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .quick-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+        }
+        .quick-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="custom-header">
+        <h1>🎨 Keap API Documentation</h1>
+        <p>Beautiful, responsive API documentation powered by Redoc</p>
+    </div>
+
+    <div class="quick-links">
+        <strong>Quick Tips:</strong>
+        <span style="margin: 0 15px;">📌 Use the sidebar for navigation</span>
+        <span style="margin: 0 15px;">🔍 Press Ctrl+F to search</span>
+        <span style="margin: 0 15px;">📱 Mobile-friendly view</span>
+    </div>
+
+    <div id="redoc-container">
+        <div class="loading">Loading documentation...</div>
+    </div>
+
+    <!-- Redoc standalone script -->
+    <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+
+    <script>
+        // Configuration options for Redoc
+        const redocOptions = {
+            theme: {
+                colors: {
+                    primary: {
+                        main: '#667eea',
+                        light: '#8b9cff',
+                        dark: '#4c5cb7',
+                        contrastText: '#ffffff'
+                    },
+                    success: {
+                        main: '#4caf50',
+                        light: '#81c784',
+                        dark: '#388e3c',
+                        contrastText: '#ffffff'
+                    },
+                    warning: {
+                        main: '#ff9800',
+                        light: '#ffb74d',
+                        dark: '#f57c00',
+                        contrastText: '#000000'
+                    },
+                    error: {
+                        main: '#f44336',
+                        light: '#e57373',
+                        dark: '#d32f2f',
+                        contrastText: '#ffffff'
+                    },
+                    text: {
+                        primary: '#333333',
+                        secondary: '#666666'
+                    },
+                    border: {
+                        light: '#e0e0e0',
+                        dark: '#d0d0d0'
+                    },
+                    responses: {
+                        success: {
+                            backgroundColor: '#f1f8f4',
+                            borderColor: '#4caf50'
+                        },
+                        error: {
+                            backgroundColor: '#fef1f0',
+                            borderColor: '#f44336'
+                        },
+                        info: {
+                            backgroundColor: '#f0f4ff',
+                            borderColor: '#667eea'
+                        }
+                    }
+                },
+                typography: {
+                    fontSize: '16px',
+                    lineHeight: '1.6',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                    code: {
+                        fontSize: '14px',
+                        fontFamily: '"Fira Code", "Monaco", "Courier New", monospace',
+                        backgroundColor: '#f5f5f5',
+                        color: '#d14'
+                    },
+                    headings: {
+                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                        fontWeight: '600'
+                    }
+                },
+                sidebar: {
+                    backgroundColor: '#fafafa',
+                    textColor: '#333333',
+                    width: '300px'
+                },
+                rightPanel: {
+                    backgroundColor: '#263238',
+                    textColor: '#ffffff',
+                    width: '40%'
+                }
+            },
+            // Redoc feature options
+            scrollYOffset: 0,
+            hideDownloadButton: false,
+            disableSearch: false,
+            nativeScrollbars: false,
+            expandResponses: '200,201',
+            showExtensions: true,
+            sortPropsAlphabetically: false,
+            sortEnumValuesAlphabetically: true,
+            sortOperationsAlphabetically: false,
+            menuToggle: true,
+            jsonSampleExpandLevel: 2,
+            hideSingleRequestSampleTab: false,
+            hideRequestPayloadSample: false,
+            expandSingleSchemaField: false,
+            schemaExpansionLevel: 0,
+            showObjectSchemaExamples: true,
+            showSecuritySchemeType: true,
+            hideSecuritySection: false,
+            unstable_ignoreMimeParameters: false,
+            allowedMdComponents: [],
+            labels: {
+                enum: 'Allowed values',
+                enumSingleValue: 'Allowed value',
+                arrayOf: 'Array of ',
+                recursive: 'Recursive',
+                deprecated: 'Deprecated',
+                example: 'Example',
+                examples: 'Examples',
+                default: 'Default',
+                property: 'property',
+                properties: 'properties',
+                additionalProperties: 'Additional properties',
+                download: 'Download',
+                downloadSpecification: 'Download OpenAPI specification',
+                response: 'Response',
+                responseSchema: 'Response Schema',
+                responseSchemas: 'Response Schemas',
+                responseSamples: 'Response Samples',
+                requestSamples: 'Request Samples',
+                callbacks: 'Callbacks',
+                requestBody: 'Request body',
+                required: 'Required',
+                optional: 'Optional'
+            }
+        };
+
+        // Function to load the OpenAPI spec and initialize Redoc
+        async function loadSpec() {
+            try {
+                // Try different possible locations for the spec file
+                const possibleUrls = [
+                    'keap.json',
+                    './keap.json',
+                    '/docs/keap-api/keap.json'
+                ];
+
+                let specData = null;
+                let specUrl = null;
+
+                // Check localStorage first
+                const storedSpec = localStorage.getItem('keap-openapi-spec');
+                if (storedSpec) {
+                    try {
+                        specData = JSON.parse(storedSpec);
+                        console.log('Loaded spec from localStorage');
+                    } catch (e) {
+                        console.warn('Failed to parse stored spec:', e);
+                    }
+                }
+
+                // If no stored spec, try to fetch from URLs
+                if (!specData) {
+                    for (const url of possibleUrls) {
+                        try {
+                            const response = await fetch(url);
+                            if (response.ok) {
+                                specData = await response.json();
+                                specUrl = url;
+                                console.log('Loaded spec from:', url);
+                                break;
+                            }
+                        } catch (e) {
+                            console.log('Failed to load from:', url);
+                        }
+                    }
+                }
+
+                if (specData) {
+                    // Initialize Redoc with the spec
+                    Redoc.init(
+                        specData,
+                        redocOptions,
+                        document.getElementById('redoc-container')
+                    );
+                } else {
+                    showError();
+                }
+            } catch (error) {
+                console.error('Error loading OpenAPI spec:', error);
+                showError();
+            }
+        }
+
+        // Function to show error and file upload
+        function showError() {
+            document.getElementById('redoc-container').innerHTML = `
+                <div class="error-container">
+                    <h2>📁 OpenAPI Specification Not Found</h2>
+                    <p>The Keap API specification file could not be loaded.</p>
+                    <div class="file-input">
+                        <p>Please upload the <strong>keap.json</strong> file:</p>
+                        <input type="file"
+                               id="spec-file"
+                               accept=".json"
+                               style="margin: 10px;">
+                        <br>
+                        <button id="file-upload" onclick="handleFileUpload()">
+                            Upload & Load Documentation
+                        </button>
+                    </div>
+                    <p style="color: #666; margin-top: 20px;">
+                        <strong>Alternative:</strong> Run a local server to avoid CORS issues:
+                        <br>
+                        <code style="background: #f5f5f5; padding: 5px 10px; border-radius: 3px;">
+                            python -m http.server 8080
+                        </code>
+                    </p>
+                </div>
+            `;
+        }
+
+        // Function to handle file upload
+        function handleFileUpload() {
+            const fileInput = document.getElementById('spec-file');
+            const file = fileInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const spec = JSON.parse(e.target.result);
+                        // Store in localStorage for future use
+                        localStorage.setItem('keap-openapi-spec', e.target.result);
+                        // Initialize Redoc with the uploaded spec
+                        Redoc.init(
+                            spec,
+                            redocOptions,
+                            document.getElementById('redoc-container')
+                        );
+                    } catch (error) {
+                        alert('Error parsing JSON file: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            } else {
+                alert('Please select a file first');
+            }
+        }
+
+        // Load spec when page loads
+        window.addEventListener('load', loadSpec);
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Press '/' to focus search
+            if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+                const searchInput = document.querySelector('.search-input');
+                if (searchInput && document.activeElement !== searchInput) {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            }
+        });
+
+        // Add smooth scrolling for anchor links
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' && e.target.getAttribute('href')?.startsWith('#')) {
+                e.preventDefault();
+                const target = document.querySelector(e.target.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        });
+    </script>
+</body>
+</html>

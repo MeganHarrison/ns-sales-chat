@@ -1,0 +1,28 @@
+name: Claude Security Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  security-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude Security Review
+        uses: anthropics/claude-code-security-review@main
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Optional: Specify file patterns to review (default: all changed files)
+          # file_patterns: "**/*.py,**/*.js,**/*.ts,**/*.jsx,**/*.tsx"
+          # Optional: Specify severity threshold (default: medium)
+          # severity_threshold: "medium"

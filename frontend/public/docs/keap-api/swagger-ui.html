@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keap API - Swagger UI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui.css">
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        body {
+            margin: 0;
+            background: #fafafa;
+        }
+        .swagger-ui .topbar {
+            background-color: #667eea;
+            background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .swagger-ui .topbar .download-url-wrapper {
+            display: flex;
+            flex: 3;
+            justify-content: flex-end;
+        }
+        .swagger-ui .topbar .download-url-wrapper input[type=text] {
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .swagger-ui .topbar .download-url-wrapper input[type=text]::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+        .swagger-ui .topbar .download-url-wrapper .download-url-button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .swagger-ui .topbar .download-url-wrapper .download-url-button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        #custom-header {
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        #custom-header h1 {
+            margin: 0;
+            color: #333;
+            font-size: 24px;
+        }
+        #custom-header p {
+            margin: 5px 0 0 0;
+            color: #666;
+        }
+        .info-banner {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 10px 15px;
+            margin: 20px;
+            border-left: 4px solid #1976d2;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div id="custom-header">
+        <h1>📚 Keap REST API v2 Documentation</h1>
+        <p>Interactive API documentation with live testing capabilities</p>
+    </div>
+
+    <div class="info-banner">
+        <strong>💡 Tip:</strong> Click "Authorize" to add your API key and test endpoints directly from this interface.
+    </div>
+
+    <div id="swagger-ui"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui-bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            // Check if we have the spec in localStorage or need to load it
+            const storedSpec = localStorage.getItem('keap-openapi-spec');
+            let specUrl = 'keap.json';
+
+            // If running from file:// protocol, we'll need the spec embedded or served
+            if (window.location.protocol === 'file:') {
+                console.warn('Running from file:// protocol. Upload the keap.json file or serve via HTTP server.');
+                specUrl = 'keap.json'; // Assume it's in the same directory
+            }
+
+            const ui = SwaggerUIBundle({
+                url: specUrl,
+                // Alternative: Use the spec object directly if you have it
+                // spec: JSON.parse(storedSpec),
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                validatorUrl: null,
+                tryItOutEnabled: true,
+                requestInterceptor: (request) => {
+                    // Add any custom headers or authentication here
+                    console.log('API Request:', request.url);
+                    return request;
+                },
+                responseInterceptor: (response) => {
+                    // Log responses for debugging
+                    console.log('API Response:', response);
+                    return response;
+                },
+                onComplete: () => {
+                    console.log('Swagger UI loaded successfully');
+
+                    // Auto-expand tags for better navigation
+                    const tags = document.querySelectorAll('.opblock-tag');
+                    tags.forEach(tag => {
+                        // Optionally auto-expand certain tags
+                        if (tag.textContent.includes('Contact') ||
+                            tag.textContent.includes('Order') ||
+                            tag.textContent.includes('Subscription')) {
+                            // tag.click(); // Uncomment to auto-expand
+                        }
+                    });
+                },
+                // Custom authentication configurations
+                initOAuth: {
+                    clientId: "your-client-id",
+                    clientSecret: "your-client-secret",
+                    realm: "your-realm",
+                    appName: "Keap API Documentation",
+                    scopeSeparator: " ",
+                },
+                // Display options
+                docExpansion: 'none', // 'none', 'list', 'full'
+                filter: true,
+                showRequestHeaders: true,
+                showCommonExtensions: true,
+                showExtensions: true,
+                showMutatedRequest: true,
+                defaultModelRendering: 'model',
+                defaultModelsExpandDepth: 1,
+                defaultModelExpandDepth: 1,
+                displayOperationId: false,
+                displayRequestDuration: true,
+                // Custom theme colors
+                theme: {
+                    colors: {
+                        primary: {
+                            main: '#667eea'
+                        }
+                    }
+                }
+            });
+
+            window.ui = ui;
+
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Press '/' to focus search
+                if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+                    const searchInput = document.querySelector('.operation-filter-input');
+                    if (searchInput && document.activeElement !== searchInput) {
+                        e.preventDefault();
+                        searchInput.focus();
+                    }
+                }
+                // Press 'Escape' to clear search
+                if (e.key === 'Escape') {
+                    const searchInput = document.querySelector('.operation-filter-input');
+                    if (searchInput) {
+                        searchInput.value = '';
+                        searchInput.dispatchEvent(new Event('input'));
+                    }
+                }
+            });
+
+            // Add custom authorization preset
+            const addApiKeyAuthorization = () => {
+                const apiKey = prompt('Enter your Keap API Key:');
+                if (apiKey) {
+                    ui.preauthorizeApiKey('ApiKeyAuth', apiKey);
+                    localStorage.setItem('keap-api-key', apiKey);
+                    alert('API Key added successfully! You can now test the endpoints.');
+                }
+            };
+
+            // Check for stored API key
+            const storedApiKey = localStorage.getItem('keap-api-key');
+            if (storedApiKey) {
+                ui.preauthorizeApiKey('ApiKeyAuth', storedApiKey);
+                console.log('API Key loaded from localStorage');
+            }
+
+            // Helper function to load OpenAPI spec from file input
+            window.loadSpecFromFile = function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const spec = JSON.parse(e.target.result);
+                            localStorage.setItem('keap-openapi-spec', e.target.result);
+                            window.location.reload();
+                        } catch (error) {
+                            alert('Error parsing JSON file: ' + error.message);
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+        };
+
+        // Error handler for spec loading
+        window.addEventListener('error', function(e) {
+            if (e.message && e.message.includes('Failed to fetch')) {
+                const container = document.getElementById('swagger-ui');
+                container.innerHTML = `
+                    <div style="padding: 40px; text-align: center;">
+                        <h2>📁 OpenAPI Specification Not Found</h2>
+                        <p>Please ensure the keap.json file is in the correct location or upload it manually:</p>
+                        <input type="file"
+                               id="spec-file"
+                               accept=".json"
+                               onchange="loadSpecFromFile(event)"
+                               style="margin: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                        <p style="color: #666; margin-top: 20px;">
+                            Expected location: <code>keap.json</code> or <code>../.claude/keap.json</code>
+                        </p>
+                        <p style="color: #666;">
+                            Or run a local server: <code>python -m http.server 8080</code>
+                        </p>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

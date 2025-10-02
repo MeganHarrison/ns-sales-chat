@@ -1,0 +1,1051 @@
+{
+  "config": {
+    "configFile": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/playwright.config.ts",
+    "rootDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/global.setup.ts",
+    "globalTeardown": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/global.teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 2
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "setup",
+        "name": "setup",
+        "testDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.setup\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "cleanup",
+        "name": "cleanup",
+        "testDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.cleanup\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "api",
+        "name": "api",
+        "testDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\/api\\/.*\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "admin",
+        "name": "admin",
+        "testDir": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*admin.*\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.55.0",
+    "workers": 2,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "auth.setup.ts",
+      "file": "auth.setup.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "authenticate",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1442,
+                  "errors": [],
+                  "stdout": [
+                    {
+                      "text": "No login required or already authenticated\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2025-09-18T06:13:22.152Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "17e3fe6f4d9d8bd79c6b-60f085b113a677673906",
+          "file": "auth.setup.ts",
+          "line": 6,
+          "column": 6
+        },
+        {
+          "title": "setup test data",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 96,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [
+                    {
+                      "text": "Test data setup failed, tests will use existing data\n"
+                    }
+                  ],
+                  "retry": 0,
+                  "startTime": "2025-09-18T06:13:22.152Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "17e3fe6f4d9d8bd79c6b-6805cfed26e44416de3e",
+          "file": "auth.setup.ts",
+          "line": 73,
+          "column": 6
+        }
+      ]
+    },
+    {
+      "title": "cleanup.setup.ts",
+      "file": "cleanup.setup.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "cleanup test artifacts",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1,
+                  "errors": [],
+                  "stdout": [
+                    {
+                      "text": "🧹 Cleaning up test artifacts...\n"
+                    },
+                    {
+                      "text": "✅ Cleanup completed\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2025-09-18T06:13:22.265Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "44a7be22359d13589cb8-01feff1349e221684adb",
+          "file": "cleanup.setup.ts",
+          "line": 5,
+          "column": 8
+        }
+      ]
+    },
+    {
+      "title": "api/backend-integration.spec.ts",
+      "file": "api/backend-integration.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Backend Integration and API Testing",
+          "file": "api/backend-integration.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [],
+          "suites": [
+            {
+              "title": "Supabase Database Integration",
+              "file": "api/backend-integration.spec.ts",
+              "line": 6,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "Database connection and basic queries",
+                  "ok": false,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 2,
+                          "parallelIndex": 0,
+                          "status": "failed",
+                          "duration": 530,
+                          "error": {
+                            "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoHaveProperty\u001b[2m(\u001b[22m\u001b[32mpath\u001b[39m\u001b[2m)\u001b[22m\n\nExpected path: \u001b[32m\"database\"\u001b[39m\nReceived path: \u001b[31m[]\u001b[39m\n\nReceived value: \u001b[31m{\"entityBreakdown\": [{\"conflicts\": 1, \"entityType\": \"contacts\", \"synced\": 1225, \"total\": 1250}, {\"conflicts\": 1, \"entityType\": \"orders\", \"synced\": 339, \"total\": 340}, {\"conflicts\": 0, \"entityType\": \"products\", \"synced\": 1257, \"total\": 1257}], \"lastSyncTime\": \"2025-09-18T05:58:24.856Z\", \"pendingConflicts\": 2, \"syncSuccessRate\": 94.5, \"totalEntities\": 2847}\u001b[39m",
+                            "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoHaveProperty\u001b[2m(\u001b[22m\u001b[32mpath\u001b[39m\u001b[2m)\u001b[22m\n\nExpected path: \u001b[32m\"database\"\u001b[39m\nReceived path: \u001b[31m[]\u001b[39m\n\nReceived value: \u001b[31m{\"entityBreakdown\": [{\"conflicts\": 1, \"entityType\": \"contacts\", \"synced\": 1225, \"total\": 1250}, {\"conflicts\": 1, \"entityType\": \"orders\", \"synced\": 339, \"total\": 340}, {\"conflicts\": 0, \"entityType\": \"products\", \"synced\": 1257, \"total\": 1257}], \"lastSyncTime\": \"2025-09-18T05:58:24.856Z\", \"pendingConflicts\": 2, \"syncSuccessRate\": 94.5, \"totalEntities\": 2847}\u001b[39m\n    at /Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/api/backend-integration.spec.ts:13:26",
+                            "location": {
+                              "file": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/api/backend-integration.spec.ts",
+                              "column": 26,
+                              "line": 13
+                            },
+                            "snippet": "  11 |       \n  12 |       const healthData = await healthResponse.json();\n> 13 |       expect(healthData).toHaveProperty('database');\n     |                          ^\n  14 |       \n  15 |       // If database is connected, verify basic operations\n  16 |       if (healthData.database === 'connected') {"
+                          },
+                          "errors": [
+                            {
+                              "location": {
+                                "file": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/api/backend-integration.spec.ts",
+                                "column": 26,
+                                "line": 13
+                              },
+                              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoHaveProperty\u001b[2m(\u001b[22m\u001b[32mpath\u001b[39m\u001b[2m)\u001b[22m\n\nExpected path: \u001b[32m\"database\"\u001b[39m\nReceived path: \u001b[31m[]\u001b[39m\n\nReceived value: \u001b[31m{\"entityBreakdown\": [{\"conflicts\": 1, \"entityType\": \"contacts\", \"synced\": 1225, \"total\": 1250}, {\"conflicts\": 1, \"entityType\": \"orders\", \"synced\": 339, \"total\": 340}, {\"conflicts\": 0, \"entityType\": \"products\", \"synced\": 1257, \"total\": 1257}], \"lastSyncTime\": \"2025-09-18T05:58:24.856Z\", \"pendingConflicts\": 2, \"syncSuccessRate\": 94.5, \"totalEntities\": 2847}\u001b[39m\n\n  11 |       \n  12 |       const healthData = await healthResponse.json();\n> 13 |       expect(healthData).toHaveProperty('database');\n     |                          ^\n  14 |       \n  15 |       // If database is connected, verify basic operations\n  16 |       if (healthData.database === 'connected') {\n    at /Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/api/backend-integration.spec.ts:13:26"
+                            }
+                          ],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:24.335Z",
+                          "annotations": [],
+                          "attachments": [],
+                          "errorLocation": {
+                            "file": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/api/backend-integration.spec.ts",
+                            "column": 26,
+                            "line": 13
+                          }
+                        }
+                      ],
+                      "status": "unexpected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-df75865722699df50ed1",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 7,
+                  "column": 9
+                },
+                {
+                  "title": "Sync status table operations",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 3,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 1119,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:24.370Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-76bab58047186759fcab",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 29,
+                  "column": 9
+                },
+                {
+                  "title": "Real-time subscriptions",
+                  "ok": false,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 4,
+                          "parallelIndex": 0,
+                          "status": "failed",
+                          "duration": 1495,
+                          "error": {
+                            "message": "TypeError: page.evaluateOnNewDocument is not a function",
+                            "stack": "TypeError: page.evaluateOnNewDocument is not a function\n    at /Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/api/backend-integration.spec.ts:53:18",
+                            "location": {
+                              "file": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/api/backend-integration.spec.ts",
+                              "column": 18,
+                              "line": 53
+                            },
+                            "snippet": "  51 |       // Enable real-time monitoring\n  52 |       let realtimeEvents = [];\n> 53 |       await page.evaluateOnNewDocument(() => {\n     |                  ^\n  54 |         window.realtimeEvents = [];\n  55 |         \n  56 |         // Mock or listen for Supabase real-time events"
+                          },
+                          "errors": [
+                            {
+                              "location": {
+                                "file": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/api/backend-integration.spec.ts",
+                                "column": 18,
+                                "line": 53
+                              },
+                              "message": "TypeError: page.evaluateOnNewDocument is not a function\n\n  51 |       // Enable real-time monitoring\n  52 |       let realtimeEvents = [];\n> 53 |       await page.evaluateOnNewDocument(() => {\n     |                  ^\n  54 |         window.realtimeEvents = [];\n  55 |         \n  56 |         // Mock or listen for Supabase real-time events\n    at /Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/api/backend-integration.spec.ts:53:18"
+                            }
+                          ],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:25.702Z",
+                          "annotations": [],
+                          "attachments": [
+                            {
+                              "name": "screenshot",
+                              "contentType": "image/png",
+                              "path": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/test-results/api-backend-integration-Ba-1b32f-ion-Real-time-subscriptions-api/test-failed-1.png"
+                            },
+                            {
+                              "name": "video",
+                              "contentType": "video/webm",
+                              "path": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/test-results/api-backend-integration-Ba-1b32f-ion-Real-time-subscriptions-api/video.webm"
+                            },
+                            {
+                              "name": "error-context",
+                              "contentType": "text/markdown",
+                              "path": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/test-results/api-backend-integration-Ba-1b32f-ion-Real-time-subscriptions-api/error-context.md"
+                            }
+                          ],
+                          "errorLocation": {
+                            "file": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/api/backend-integration.spec.ts",
+                            "column": 18,
+                            "line": 53
+                          }
+                        }
+                      ],
+                      "status": "unexpected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-b6b6d0421739f4a1df8e",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 47,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Keap API Integration",
+              "file": "api/backend-integration.spec.ts",
+              "line": 88,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "OAuth token management",
+                  "ok": false,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 3,
+                          "parallelIndex": 1,
+                          "status": "failed",
+                          "duration": 254,
+                          "error": {
+                            "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoHaveProperty\u001b[2m(\u001b[22m\u001b[32mpath\u001b[39m\u001b[2m)\u001b[22m\n\nExpected path: \u001b[32m\"authUrl\"\u001b[39m\nReceived path: \u001b[31m[]\u001b[39m\n\nReceived value: \u001b[31m{\"auth_url\": \"https://accounts.infusionsoft.com/app/oauth/authorize?client_id=demo_client_id&redirect_uri=http%3A%2F%2Flocalhost%3A3006%2Fapi%2Fkeap%2Foauth%2Fcallback&response_type=code&scope=full\", \"keapAccountId\": \"test-account-123\", \"message\": \"OAuth URL generated (demo mode)\", \"success\": true}\u001b[39m",
+                            "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoHaveProperty\u001b[2m(\u001b[22m\u001b[32mpath\u001b[39m\u001b[2m)\u001b[22m\n\nExpected path: \u001b[32m\"authUrl\"\u001b[39m\nReceived path: \u001b[31m[]\u001b[39m\n\nReceived value: \u001b[31m{\"auth_url\": \"https://accounts.infusionsoft.com/app/oauth/authorize?client_id=demo_client_id&redirect_uri=http%3A%2F%2Flocalhost%3A3006%2Fapi%2Fkeap%2Foauth%2Fcallback&response_type=code&scope=full\", \"keapAccountId\": \"test-account-123\", \"message\": \"OAuth URL generated (demo mode)\", \"success\": true}\u001b[39m\n    at /Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/api/backend-integration.spec.ts:101:25",
+                            "location": {
+                              "file": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/api/backend-integration.spec.ts",
+                              "column": 25,
+                              "line": 101
+                            },
+                            "snippet": "   99 |       const oauthData = await oauthResponse.json();\n  100 |       \n> 101 |       expect(oauthData).toHaveProperty('authUrl');\n      |                         ^\n  102 |       expect(oauthData.authUrl).toContain('accounts.infusionsoft.com');\n  103 |       expect(oauthData.authUrl).toContain('client_id=');\n  104 |       expect(oauthData.authUrl).toContain('scope=full');"
+                          },
+                          "errors": [
+                            {
+                              "location": {
+                                "file": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/api/backend-integration.spec.ts",
+                                "column": 25,
+                                "line": 101
+                              },
+                              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoHaveProperty\u001b[2m(\u001b[22m\u001b[32mpath\u001b[39m\u001b[2m)\u001b[22m\n\nExpected path: \u001b[32m\"authUrl\"\u001b[39m\nReceived path: \u001b[31m[]\u001b[39m\n\nReceived value: \u001b[31m{\"auth_url\": \"https://accounts.infusionsoft.com/app/oauth/authorize?client_id=demo_client_id&redirect_uri=http%3A%2F%2Flocalhost%3A3006%2Fapi%2Fkeap%2Foauth%2Fcallback&response_type=code&scope=full\", \"keapAccountId\": \"test-account-123\", \"message\": \"OAuth URL generated (demo mode)\", \"success\": true}\u001b[39m\n\n   99 |       const oauthData = await oauthResponse.json();\n  100 |       \n> 101 |       expect(oauthData).toHaveProperty('authUrl');\n      |                         ^\n  102 |       expect(oauthData.authUrl).toContain('accounts.infusionsoft.com');\n  103 |       expect(oauthData.authUrl).toContain('client_id=');\n  104 |       expect(oauthData.authUrl).toContain('scope=full');\n    at /Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/api/backend-integration.spec.ts:101:25"
+                            }
+                          ],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:25.527Z",
+                          "annotations": [],
+                          "attachments": [],
+                          "errorLocation": {
+                            "file": "/Users/meganharrison/Documents/github/ns projects/ns-ai-agent-mastery/ns_Agent_Deployment/frontend_nextjs/tests/api/backend-integration.spec.ts",
+                            "column": 25,
+                            "line": 101
+                          }
+                        }
+                      ],
+                      "status": "unexpected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-2ce35ad0eeca089697ec",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 89,
+                  "column": 9
+                },
+                {
+                  "title": "Token validation and refresh simulation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 5,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 97,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:26.367Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-7d11a00f6b4f7220fd81",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 108,
+                  "column": 9
+                },
+                {
+                  "title": "Rate limiting protection",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 5,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 490,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:26.480Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-9b012c0fd41c7b438983",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 126,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Cloudflare Workers Integration",
+              "file": "api/backend-integration.spec.ts",
+              "line": 157,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "Worker deployment status",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 5,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 2,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "No Cloudflare Worker URLs configured - using local fallbacks\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:26.978Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-28a8dc4176b3149b314c",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 158,
+                  "column": 9
+                },
+                {
+                  "title": "Webhook endpoint availability",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 5,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 56,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "Webhook handler URL not configured - testing local endpoint\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:26.991Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-2aaa9757d8638ac2691a",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 186,
+                  "column": 9
+                },
+                {
+                  "title": "Durable Object state management",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 5,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 4,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "Sync coordinator URL not configured - testing local state\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:27.054Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-43228f63af1548c6f7c7",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 224,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Error Handling and Recovery",
+              "file": "api/backend-integration.spec.ts",
+              "line": 248,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "Database connection failure handling",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 5,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 294,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:27.066Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-460d1e14c71d45e8ff48",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 249,
+                  "column": 9
+                },
+                {
+                  "title": "API timeout handling",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 6,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 307,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:27.726Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-44466c464e6170b46545",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 265,
+                  "column": 9
+                },
+                {
+                  "title": "Invalid request handling",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 5,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 478,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:27.367Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-e5a067f7616da7be93e0",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 280,
+                  "column": 9
+                },
+                {
+                  "title": "Authentication error handling",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 5,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 50,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:27.850Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-bbc92282c665622c24ca",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 307,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Performance and Monitoring",
+              "file": "api/backend-integration.spec.ts",
+              "line": 327,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "API response times",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 5,
+                          "parallelIndex": 1,
+                          "status": "passed",
+                          "duration": 976,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "/api/dashboard/health: 265ms\n"
+                            },
+                            {
+                              "text": "/api/dashboard/metrics: 404ms\n"
+                            },
+                            {
+                              "text": "/api/dashboard/trends?days=7: 303ms\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:27.905Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-940ae6cc6f84d84e5b50",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 328,
+                  "column": 9
+                },
+                {
+                  "title": "Concurrent request handling",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 6,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 531,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:28.044Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-89356a08d270ac19a75c",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 347,
+                  "column": 9
+                },
+                {
+                  "title": "Memory and resource usage monitoring",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "api",
+                      "projectName": "api",
+                      "results": [
+                        {
+                          "workerIndex": 6,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 1344,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "Performance metrics: {\n  loadTime: \u001b[33m0\u001b[39m,\n  domContentLoaded: \u001b[33m0.09999999403953552\u001b[39m,\n  firstPaint: \u001b[33m184\u001b[39m,\n  firstContentfulPaint: \u001b[33m184\u001b[39m\n}\n"
+                            }
+                          ],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-09-18T06:13:28.583Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "expected"
+                    }
+                  ],
+                  "id": "facac4159c4ef56b8744-aa7b6f84e4be440a23b3",
+                  "file": "api/backend-integration.spec.ts",
+                  "line": 361,
+                  "column": 9
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-09-18T06:13:20.632Z",
+    "duration": 9433.109,
+    "expected": 16,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}

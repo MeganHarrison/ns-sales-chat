@@ -1,0 +1,43 @@
+name = "sync-worker"
+compatibility_date = "2025-01-15"
+main = "src/index.ts"
+
+[observability]
+enabled = true
+
+# Service binding to sync-coordinator
+[[services]]
+binding = "SYNC_COORDINATOR"
+service = "sync-coordinator"
+
+# Hyperdrive binding for optimized Supabase connections
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "your-hyperdrive-config-id"
+
+# KV namespace for sync metadata caching
+[[kv_namespaces]]
+binding = "SYNC_CACHE"
+id = "your-kv-namespace-id"
+preview_id = "your-kv-namespace-preview-id"
+
+# Scheduled trigger for automated sync (every 30 minutes)
+[[triggers]]
+crons = ["0,30 * * * *"]
+
+# Environment variables for development
+[vars]
+ENVIRONMENT = "development"
+
+# Production environment configuration
+[env.production.vars]
+ENVIRONMENT = "production"
+
+[env.production.services]
+SYNC_COORDINATOR = "sync-coordinator"
+
+[env.production.kv_namespaces]
+SYNC_CACHE = "your-production-kv-namespace-id"
+
+[env.production.hyperdrive]
+HYPERDRIVE = "your-production-hyperdrive-config-id"
