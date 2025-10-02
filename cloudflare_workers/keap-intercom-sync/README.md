@@ -73,13 +73,42 @@ CREATE INDEX idx_keap_intercom_sync_logs_sync_status ON keap_intercom_sync_logs(
 wrangler deploy
 ```
 
-### 5. Configure Keap Webhook
+### 5. Configure Keap Webhook (via API)
 
-1. Go to Keap Settings > Webhooks
-2. Create new webhook:
-   - **URL**: `https://your-worker.workers.dev/webhook/keap`
-   - **Events**: Contact created, Contact updated
-   - **Secret**: Use the same value as `KEAP_WEBHOOK_SECRET`
+**Note**: Keap doesn't have webhooks in the UI - you create them via API.
+
+Run the setup script:
+
+```bash
+# Set your Keap API key
+export KEAP_API_KEY="your_keap_access_token"
+
+# Set your deployed worker URL
+export WORKER_URL="https://your-worker.workers.dev"
+
+# Run setup script
+node setup-webhook.js
+```
+
+This will:
+- Create webhook subscriptions for `contact.add` and `contact.edit` events
+- Automatically verify the webhooks
+- List all configured webhooks
+
+**Manual API Setup** (alternative):
+
+```bash
+# Create webhook via Keap API
+curl -X POST https://api.infusionsoft.com/crm/rest/v1/hooks \
+  -H "Authorization: Bearer YOUR_KEAP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "eventKey": "contact.add",
+    "hookUrl": "https://your-worker.workers.dev/webhook/keap"
+  }'
+
+# Repeat for contact.edit event
+```
 
 ## API Endpoints
 
