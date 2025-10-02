@@ -1,0 +1,52 @@
+name: OpenAI Code Review
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  pull_request_review_comment:
+    types: [created, edited]
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  code-review:
+    # Skip if comment is from bot to avoid infinite loops
+    if: github.event_name == 'pull_request' || (github.event.comment && !contains(github.event.comment.user.login, '[bot]'))
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ChatGPT Code Review
+        uses: anc95/ChatGPT-CodeReview@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # Optional: Use GPT-4 for better results (default is gpt-3.5-turbo)
+          OPENAI_API_MODEL: "gpt-4o"
+          # Optional: Add custom language for comments
+          LANGUAGE: "en"
+          # Optional: Add custom prompt
+          PROMPT: |
+            Please review this code for:
+            1. Security vulnerabilities
+            2. Performance issues
+            3. Best practices
+            4. Potential bugs
+            5. Code clarity and maintainability
+
+            Be constructive and provide specific suggestions for improvements.
+          # Optional: Set temperature for response variability (0.0-1.0)
+          TEMPERATURE: "0.3"
+          # Optional: Set max tokens for response length
+          MAX_TOKENS: "2048"
+          # Optional: Exclude certain file patterns
+          exclude: "*.md, *.txt, *.yml, *.yaml, *.json, *.lock, *.toml"

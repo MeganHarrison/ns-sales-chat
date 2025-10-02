@@ -1,0 +1,131 @@
+name: OpenAI Issue Assistant
+
+on:
+  issues:
+    types: [opened, edited, labeled]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  issue-assistant:
+    # Trigger when issue is labeled with "ai-help" or comment mentions @gpt
+    if: |
+      (github.event.issue && contains(github.event.issue.labels.*.name, 'ai-help')) ||
+      (github.event.comment && contains(github.event.comment.body, '@gpt'))
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: OpenAI Issue Response
+        uses: actions/github-script@v7
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { OpenAI } = require('openai');
+
+            // Initialize OpenAI client
+            const openai = new OpenAI({
+              apiKey: process.env.OPENAI_API_KEY,
+            });
+
+            // Get issue details
+            const issue = context.payload.issue || context.payload.pull_request;
+            const comment = context.payload.comment;
+
+            // Determine the prompt based on the trigger
+            let prompt = '';
+            if (comment && comment.body.includes('@gpt')) {
+              // Respond to comment
+              prompt = `
+                You are a helpful GitHub assistant.
+                Issue Title: ${issue.title}
+                Issue Body: ${issue.body}
+                Latest Comment: ${comment.body.replace('@gpt', '')}
+
+                Please provide a helpful response to assist with this issue or question.
+                If it's a bug report, suggest debugging steps.
+                If it's a feature request, provide implementation guidance.
+                If it's a question, provide a clear answer with examples.
+              `;
+            } else if (issue.labels.some(l => l.name === 'bug')) {
+              prompt = `
+                Analyze this bug report and provide:
+                1. Potential root causes
+                2. Debugging steps
+                3. Possible solutions
+
+                Issue Title: ${issue.title}
+                Issue Description: ${issue.body}
+              `;
+            } else if (issue.labels.some(l => l.name === 'feature-request')) {
+              prompt = `
+                Analyze this feature request and provide:
+                1. Implementation approach
+                2. Required changes
+                3. Potential challenges
+
+                Feature Request: ${issue.title}
+                Details: ${issue.body}
+              `;
+            } else {
+              prompt = `
+                Analyze this GitHub issue and provide helpful guidance:
+
+                Issue Title: ${issue.title}
+                Issue Description: ${issue.body}
+              `;
+            }
+
+            try {
+              // Call OpenAI API
+              const completion = await openai.chat.completions.create({
+                model: "gpt-4o",
+                messages: [
+                  {
+                    role: "system",
+                    content: "You are a helpful GitHub assistant that provides constructive feedback and actionable suggestions for issues and pull requests."
+                  },
+                  {
+                    role: "user",
+                    content: prompt
+                  }
+                ],
+                temperature: 0.3,
+                max_tokens: 2048,
+              });
+
+              const response = completion.choices[0].message.content;
+
+              // Post the response as a comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `## 🤖 AI Assistant Response\n\n${response}\n\n---\n*Powered by GPT-4. To interact with me, mention @gpt in your comment.*`
+              });
+
+            } catch (error) {
+              console.error('Error calling OpenAI API:', error);
+
+              // Post error message
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `❌ Sorry, I encountered an error while processing your request. Please check that the OpenAI API key is configured correctly and try again.`
+              });
+            }
