@@ -271,44 +271,36 @@ class IntercomSyncOrchestrator:
                 console=console
             ) as progress:
 
-                # First, count total conversations
-                count_task = progress.add_task("[cyan]Counting conversations...", total=None)
+                # Fetch all conversations using bulk export (more reliable, includes full details)
+                sync_task = progress.add_task("[cyan]Syncing conversations...", total=None)
 
-                conversation_ids = []
-                for conv in self.intercom.list_all_conversations(batch_size=150):
-                    conversation_ids.append(conv['id'])
-
-                progress.update(count_task, completed=True)
-                total_conversations = len(conversation_ids)
-
-                console.print(f"[green]Found {total_conversations} conversations to sync[/green]")
-
-                # Now sync them
-                sync_task = progress.add_task(
-                    "[cyan]Syncing conversations...",
-                    total=total_conversations
-                )
-
-                # Process in batches
+                # Process conversations as they come from the API
                 batch = []
-                for conv_id in conversation_ids:
-                    try:
-                        # Fetch full conversation details
-                        full_conv = self.intercom.get_conversation_with_parts(conv_id)
-                        batch.append(full_conv)
+                total_processed = 0
 
-                        if len(batch) >= batch_size:
-                            self.sync_conversations_batch(batch, progress, sync_task)
-                            batch = []
+                for full_conv in self.intercom.export_conversations_bulk(
+                    start_date=start_date,
+                    end_date=end_date,
+                    include_closed=True
+                ):
+                    batch.append(full_conv)
+                    total_processed += 1
 
-                    except Exception as e:
-                        logger.error(f"Error fetching conversation {conv_id}: {e}")
-                        self.stats['errors'].append(f"Fetch {conv_id}: {str(e)}")
-                        progress.update(sync_task, advance=1)
+                    if len(batch) >= batch_size:
+                        self.sync_conversations_batch(batch, progress, sync_task)
+                        batch = []
+
+                        # Update progress display
+                        progress.update(
+                            sync_task,
+                            description=f"[cyan]Synced {total_processed} conversations..."
+                        )
 
                 # Process remaining batch
                 if batch:
                     self.sync_conversations_batch(batch, progress, sync_task)
+
+                console.print(f"[green]Completed sync of {total_processed} conversations[/green]")
 
             # Update sync log
             self.supabase.update_sync_log(
