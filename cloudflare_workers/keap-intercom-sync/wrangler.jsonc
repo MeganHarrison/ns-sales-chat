@@ -1,0 +1,11 @@
+{
+  "name": "keap-intercom-sync",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-10-01",
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

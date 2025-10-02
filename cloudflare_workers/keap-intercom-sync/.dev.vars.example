@@ -1,0 +1,12 @@
+# Intercom API Access Token
+INTERCOM_ACCESS_TOKEN=your_intercom_access_token_here
+
+# Keap API Key (OAuth access token)
+KEAP_API_KEY=your_keap_api_key_here
+
+# Keap Webhook Secret (for verifying webhook authenticity)
+KEAP_WEBHOOK_SECRET=your_webhook_secret_here
+
+# Supabase Configuration
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your_service_role_key_here
