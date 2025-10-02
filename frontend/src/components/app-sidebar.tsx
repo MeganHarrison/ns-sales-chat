@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import * as React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-import { SearchForm } from "@/components/search-form"
-import { VersionSwitcher } from "@/components/version-switcher"
+import { SearchForm } from "@/components/search-form";
+import { VersionSwitcher } from "@/components/version-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -17,7 +17,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 // Navigation data for Nutrition Solutions
 const data = {
@@ -38,30 +38,92 @@ const data = {
           url: "/orders",
         },
         {
+          title: "Subscriptions",
+          url: "/subscriptions",
+        },
+        {
           title: "Contacts",
           url: "/contacts",
+        },
+        {
+          title: "Products",
+          url: "/products",
+        },
+        {
+          title: "Reports",
+          url: "/reports/orders-dashboard",
+        },
+        {
+          title: "Request Offs",
+          url: "/request-offs",
+        },
+        {
+          title: "Active Clients",
+          url: "/keap/active-clients",
+        },
+        {
+          title: "Keap Contacts",
+          url: "/keap/contacts",
+        },
+        {
+          title: "Keap Orders",
+          url: "/keap/orders",
+        },
+        {
+          title: "Keap Tags",
+          url: "/keap-tags",
         },
         {
           title: "Statistics",
           url: "/stats",
         },
+        {
+          title: "Resources",
+          url: "/resources",
+        },
+        {
+          title: "Documents",
+          url: "/documents",
+        },
+        {
+          title: "Data",
+          url: "/data",
+        },
       ],
     },
     {
-      title: "Analytics & Reports",
-      url: "/analytics",
+      title: "AI Tools",
+      url: "/nutrition-chat",
       items: [
         {
-          title: "Analytics Dashboard",
-          url: "/analytics",
+          title: "Nutrition AI Chat",
+          url: "/nutrition-chat",
+        },
+      ],
+    },
+    {
+      title: "Intercom",
+      url: "/intercom-dashboard",
+      items: [
+        {
+          title: "Intercom Dashboard",
+          url: "/intercom-dashboard",
         },
         {
-          title: "Sales Reports",
-          url: "/reports",
+          title: "Intercom Conversations",
+          url: "/intercom-conversations",
         },
         {
-          title: "Customer Insights",
-          url: "/dashboard",
+          title: "Intercom Messages",
+          url: "/intercom-messages",
+        },
+        {
+          title: "Intercom Tags",
+          url: "/intercom-tags",
+        },
+        {
+          title: "Intercom Users",
+          url: "/intercom-users",
         },
       ],
     },
@@ -69,18 +131,6 @@ const data = {
       title: "Keap CRM",
       url: "/keap",
       items: [
-        {
-          title: "Active Clients",
-          url: "/keap/active-clients",
-        },
-        {
-          title: "Contacts",
-          url: "/keap/contacts",
-        },
-        {
-          title: "Orders",
-          url: "/keap/orders",
-        },
         {
           title: "Sync Status",
           url: "/api/keap/sync",
@@ -168,10 +218,10 @@ const data = {
       ],
     },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <Sidebar {...props}>
@@ -183,7 +233,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-semibold">{data.appName}</span>
-              <span className="text-xs text-muted-foreground">{data.appDescription}</span>
+              <span className="text-xs text-muted-foreground">
+                {data.appDescription}
+              </span>
             </div>
           </Link>
         </div>
@@ -212,5 +264,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

@@ -172,7 +172,7 @@ async function callSupabaseRPC(supabaseUrl, supabaseKey, functionName, params) {
 }
 
 /**
- * Helper: Format retrieved docs for Claude context
+ * Helper: Format retrieved docs for AI context
  */
 export function formatDocsForContext(docs) {
   if (!docs || docs.length === 0) {

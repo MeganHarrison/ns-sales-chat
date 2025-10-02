@@ -1,15 +1,21 @@
-# Keap-Intercom Contact Sync Worker
+# Intercom-Keap Contact Sync Worker
 
-Bidirectional contact synchronization between Keap and Intercom, automatically updating Intercom contacts with Keap contact IDs as `external_id`.
+**PRIMARY SYNC DIRECTION: Intercom → Keap**
+
+Automatically syncs users/contacts created in Intercom to Keap, linking them with Intercom's `external_id` field set to the Keap contact ID.
 
 ## Features
 
-- ✅ **Automatic Webhook Sync** - Listens for Keap contact events and syncs to Intercom
-- ✅ **Smart Matching** - Finds existing Intercom contacts by email before creating duplicates
+- ✅ **Automatic Webhook Sync** - Listens for Intercom user/contact events and syncs to Keap (PRIMARY)
+- ✅ **Smart Matching** - Finds existing Keap contacts by email before creating duplicates
 - ✅ **External ID Linking** - Sets Intercom `external_id` to Keap contact ID for easy reference
-- ✅ **Manual Sync** - API endpoints for on-demand single or batch sync
+- ✅ **Legacy Keap Sync** - Optional manual sync from Keap → Intercom (for existing contacts)
 - ✅ **Sync Logging** - Tracks all sync operations in Supabase
 - ✅ **Error Handling** - Comprehensive error handling and retry logic
+
+## Why Intercom → Keap?
+
+This sync direction prevents unnecessary charges from Intercom, which bills based on user count. By only syncing users that are created in Intercom (not all Keap contacts), you maintain control over which contacts appear in Intercom.
 
 ## Setup
 
@@ -29,8 +35,8 @@ ENVIRONMENT = "production"
 
 # Secrets (use wrangler secret put)
 # INTERCOM_ACCESS_TOKEN
+# INTERCOM_CLIENT_SECRET (optional - for webhook signature verification)
 # KEAP_API_KEY
-# KEAP_WEBHOOK_SECRET
 # SUPABASE_URL
 # SUPABASE_SERVICE_KEY
 ```
@@ -39,8 +45,8 @@ Set secrets:
 
 ```bash
 wrangler secret put INTERCOM_ACCESS_TOKEN
+wrangler secret put INTERCOM_CLIENT_SECRET  # Optional but recommended
 wrangler secret put KEAP_API_KEY
-wrangler secret put KEAP_WEBHOOK_SECRET
 wrangler secret put SUPABASE_URL
 wrangler secret put SUPABASE_SERVICE_KEY
 ```
@@ -73,48 +79,74 @@ CREATE INDEX idx_keap_intercom_sync_logs_sync_status ON keap_intercom_sync_logs(
 wrangler deploy
 ```
 
-### 5. Configure Keap Webhook (via API)
+### 5. Configure Intercom Webhook
 
-**Note**: Keap doesn't have webhooks in the UI - you create them via API.
+**PRIMARY SETUP**: Configure Intercom to send webhooks when users/contacts are created.
 
 Run the setup script:
 
 ```bash
-# Set your Keap API key
-export KEAP_API_KEY="your_keap_access_token"
+# Set your Intercom access token
+export INTERCOM_ACCESS_TOKEN="your_intercom_access_token"
 
 # Set your deployed worker URL
 export WORKER_URL="https://your-worker.workers.dev"
 
 # Run setup script
-node setup-webhook.js
+node setup-intercom-webhook.js
 ```
 
 This will:
-- Create webhook subscriptions for `contact.add` and `contact.edit` events
-- Automatically verify the webhooks
+- Create webhook subscriptions for `user.created` and `contact.created` events
 - List all configured webhooks
+- Provide verification instructions
 
-**Manual API Setup** (alternative):
+**Manual Intercom Setup** (alternative):
+
+You can also set up webhooks via the Intercom dashboard:
+1. Go to Settings → Developers → Webhooks
+2. Click "New webhook"
+3. Set URL to: `https://your-worker.workers.dev/webhook/intercom`
+4. Subscribe to topics: `user.created`, `contact.created`
+5. Save the webhook
+
+### 6. (Optional) Configure Keap Webhook for Legacy Sync
+
+**Only needed if you want to sync existing Keap contacts → Intercom**
 
 ```bash
-# Create webhook via Keap API
-curl -X POST https://api.infusionsoft.com/crm/rest/v1/hooks \
-  -H "Authorization: Bearer YOUR_KEAP_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "eventKey": "contact.add",
-    "hookUrl": "https://your-worker.workers.dev/webhook/keap"
-  }'
+# Set environment variables
+export KEAP_API_KEY="your_keap_access_token"
+export WORKER_URL="https://your-worker.workers.dev"
 
-# Repeat for contact.edit event
+# Run Keap setup script
+node setup-webhook.js
 ```
 
 ## API Endpoints
 
-### POST /webhook/keap
+### POST /webhook/intercom (PRIMARY)
 
-Keap webhook endpoint (automatic sync)
+Intercom webhook endpoint - automatically syncs Intercom → Keap
+
+**Request**: Sent by Intercom automatically when user/contact is created
+**Response**:
+```json
+{
+  "message": "Webhook received and processing",
+  "event_id": "..."
+}
+```
+
+**What it does**:
+1. Receives user/contact data from Intercom
+2. Searches for matching contact in Keap by email
+3. Creates or updates contact in Keap
+4. Links Intercom contact with Keap ID via `external_id`
+
+### POST /webhook/keap (LEGACY)
+
+Keap webhook endpoint - manual Keap → Intercom sync
 
 **Request**: Sent by Keap automatically
 **Response**:
@@ -127,9 +159,9 @@ Keap webhook endpoint (automatic sync)
 }
 ```
 
-### POST /sync/contact
+### POST /sync/contact (LEGACY)
 
-Manual single contact sync
+Manual single contact sync from Keap → Intercom
 
 **Request**:
 ```json
@@ -147,9 +179,9 @@ Manual single contact sync
 }
 ```
 
-### POST /sync/batch
+### POST /sync/batch (LEGACY)
 
-Batch sync multiple contacts
+Batch sync multiple contacts from Keap → Intercom
 
 **Request**:
 ```json
@@ -183,28 +215,29 @@ Health check endpoint
 
 ## How It Works
 
-### Automatic Sync (Webhook Flow)
+### PRIMARY: Automatic Sync (Intercom → Keap)
 
-1. **Contact Event** - Contact created/updated in Keap
-2. **Webhook Triggered** - Keap sends webhook to worker
-3. **Fetch Contact** - Worker retrieves full contact data from Keap
-4. **Search Intercom** - Searches for existing contact by email
-5. **Update or Create**:
-   - If found: Updates contact with `external_id = keap_contact_id`
-   - If not found: Creates new contact with `external_id = keap_contact_id`
-6. **Log Sync** - Records sync operation in Supabase
+1. **User Created in Intercom** - New user/contact created in Intercom
+2. **Webhook Triggered** - Intercom sends webhook to worker `/webhook/intercom`
+3. **Receive Contact Data** - Worker receives user email, name, phone from webhook
+4. **Search Keap** - Searches for existing contact in Keap by email
+5. **Create or Update in Keap**:
+   - If found: Updates existing Keap contact
+   - If not found: Creates new contact in Keap
+6. **Link via External ID** - Sets Intercom contact's `external_id` to Keap contact ID
+7. **Log Sync** - Records sync operation in Supabase
 
-### Manual Sync
+### LEGACY: Manual Sync (Keap → Intercom)
 
-Use the `/sync/contact` or `/sync/batch` endpoints to manually trigger syncs:
+Use the `/sync/contact` or `/sync/batch` endpoints to manually sync existing Keap contacts:
 
 ```bash
-# Single contact
+# Single contact (Keap → Intercom)
 curl -X POST https://your-worker.workers.dev/sync/contact \
   -H "Content-Type: application/json" \
   -d '{"keap_contact_id": 12345}'
 
-# Batch contacts
+# Batch contacts (Keap → Intercom)
 curl -X POST https://your-worker.workers.dev/sync/batch \
   -H "Content-Type: application/json" \
   -d '{"keap_contact_ids": [12345, 67890]}'
@@ -234,19 +267,26 @@ npm run deploy
 ## Troubleshooting
 
 **Webhook not receiving events:**
-- Verify webhook URL in Keap settings
-- Check webhook secret matches `KEAP_WEBHOOK_SECRET`
+- Verify webhook URL in Intercom dashboard: Settings → Developers → Webhooks
+- Check webhook signature verification with `INTERCOM_CLIENT_SECRET`
 - Review worker logs with `wrangler tail`
+- Test webhook manually using Intercom's webhook tester
 
 **Contacts not syncing:**
-- Ensure contact has valid email address
-- Check Supabase logs for error messages
-- Verify Intercom API token has write permissions
+- Ensure contact has valid email address (required)
+- Check Supabase sync logs for error messages
+- Verify Keap API token has write permissions for contacts
+- Ensure Intercom API token has permission to update contacts
 
 **Duplicate contacts:**
-- Worker searches by email before creating
-- If multiple Intercom contacts exist with same email, updates the first match
-- Consider running manual cleanup script
+- Worker searches Keap by email before creating
+- If multiple Keap contacts exist with same email, updates the first match
+- Consider running manual cleanup in Keap first
+
+**External ID not updating:**
+- Ensure Intercom API token has `contacts:write` permission
+- Check worker logs for `linkKeapContact` errors
+- Verify the contact role is set to 'user' (required for external_id)
 
 ## License
 

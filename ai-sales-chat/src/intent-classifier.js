@@ -1,7 +1,7 @@
 /**
  * Intent Classifier Module
- * 
- * Uses Claude to classify user intent into categories:
+ *
+ * Uses OpenAI to classify user intent into categories:
  * - FACTUAL: Questions needing specific information
  * - EMOTIONAL: Personal struggles, motivation requests
  * - OBJECTION: Expressing doubt or hesitation
@@ -9,7 +9,7 @@
  * - CASUAL: Small talk, greetings
  */
 
-export async function classifyIntent(userMessage, conversationHistory, anthropicApiKey) {
+export async function classifyIntent(userMessage, conversationHistory, openaiApiKey) {
   const systemPrompt = `You are an intent classifier for Nutrition Solutions sales chat.
 
 Analyze the user's message and classify it into one of these categories:
@@ -60,52 +60,47 @@ Return JSON ONLY (no other text):
 }`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Build messages array for OpenAI format
+    const messages = [
+      {
+        role: 'system',
+        content: systemPrompt
+      },
+      // Include last 4 messages for context
+      ...conversationHistory.slice(-4).map(msg => ({
+        role: msg.role === 'assistant' ? 'assistant' : 'user',
+        content: msg.content
+      })),
+      {
+        role: 'user',
+        content: `Classify this message: "${userMessage}"`,
+      },
+    ];
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'x-api-key': anthropicApiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 500,
+        model: 'gpt-4o',
+        messages: messages,
         temperature: 0.3, // Lower temp for more consistent classification
-        system: systemPrompt,
-        messages: [
-          // Include last 4 messages for context
-          ...conversationHistory.slice(-4),
-          {
-            role: 'user',
-            content: `Classify this message: "${userMessage}"`,
-          },
-        ],
+        max_tokens: 500,
+        response_format: { type: 'json_object' }
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Claude API error: ${response.status} ${response.statusText}`);
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
-    const rawText = data.content[0].text;
+    const rawText = data.choices[0].message.content;
 
-    // Parse JSON response
-    // Handle cases where Claude might add markdown formatting
-    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error('Failed to extract JSON from Claude response:', rawText);
-      // Return default classification
-      return {
-        intent: 'FACTUAL',
-        confidence: 0.5,
-        specific_type: 'unknown',
-        urgency: 'medium',
-        reasoning: 'Classification failed, defaulted to FACTUAL',
-      };
-    }
-
-    const result = JSON.parse(jsonMatch[0]);
+    // Parse JSON response (OpenAI returns clean JSON with response_format)
+    const result = JSON.parse(rawText);
 
     // Validate result
     const validIntents = ['FACTUAL', 'EMOTIONAL', 'OBJECTION', 'READY_TO_BUY', 'CASUAL'];

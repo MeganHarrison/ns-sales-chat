@@ -32,7 +32,7 @@ const __dirname = path.dirname(__filename);
 // Initialize clients
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY // Use service role for admin operations
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY // Use service role or anon key
 );
 
 const openai = new OpenAI({
@@ -69,8 +69,15 @@ function loadJSON(filename) {
 // 1. Ingest FAQs
 async function ingestFAQs() {
   console.log('\n📚 Ingesting FAQs...');
-  const faqs = loadJSON('faqs.json');
-  if (!faqs) return;
+  const faqData = loadJSON('faqs.json');
+  if (!faqData) return;
+
+  // Handle both array and object with 'faqs' property
+  const faqs = Array.isArray(faqData) ? faqData : faqData.faqs;
+  if (!faqs) {
+    console.error('❌ FAQs data structure not recognized');
+    return;
+  }
 
   let successCount = 0;
   let errorCount = 0;
@@ -297,18 +304,27 @@ async function main() {
   console.log('');
 
   // Check environment variables
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.OPENAI_API_KEY) {
+  if (!process.env.SUPABASE_URL || (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_ANON_KEY) || !process.env.OPENAI_API_KEY) {
     console.error('❌ Missing required environment variables!');
-    console.error('Required: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY');
+    console.error('Required: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_ANON_KEY), OPENAI_API_KEY');
     process.exit(1);
   }
 
   try {
     await ingestFAQs();
-    await ingestProducts();
-    await ingestTestimonials();
-    await ingestObjections();
-    await ingestCompanyInfo();
+    // Only run other ingestions if files exist
+    if (fs.existsSync(path.join(__dirname, '..', 'data', 'products.json'))) {
+      await ingestProducts();
+    }
+    if (fs.existsSync(path.join(__dirname, '..', 'data', 'testimonials.json'))) {
+      await ingestTestimonials();
+    }
+    if (fs.existsSync(path.join(__dirname, '..', 'data', 'objections.json'))) {
+      await ingestObjections();
+    }
+    if (fs.existsSync(path.join(__dirname, '..', 'data', 'company-info.json'))) {
+      await ingestCompanyInfo();
+    }
 
     console.log('\n\n🎉 Data ingestion complete!');
     console.log('\n📊 Next Steps:');

@@ -1,0 +1,44 @@
+Month,Total Orders,Baseline Orders (6mo avg),Raw Lift,Ad Spend,Ad Spend % Change,Seasonal Adjustment,Campaign Active,Attribution %,AI Attributed Orders,CLV per Order,Monthly AI Value,Cumulative AI Value,Monthly Fee,Cumulative Fees,ROI,Notes
+Pre-Launch Baseline,697,697,0,0,0%,0,No,0%,0,1800,0,0,0,0,0,Establishing 6-month rolling average
+Month 1,0,697,0,0,0%,0,No,0%,0,1800,0,0,2000,2000,0,Monitoring period - system learning
+Month 2,0,697,0,0,0%,0,No,0%,0,1800,0,0,2000,4000,0,Monitoring period - data collection
+Month 3,0,697,0,0,0%,0,No,0%,0,1800,0,0,2000,6000,0,Monitoring period - baseline verification
+Month 4,732,697,35,0,0%,0,No,50%,17.5,1800,31500,31500,3500,9500,3.3x,Performance fees begin
+Month 5,732,697,35,0,0%,0,No,50%,17.5,1800,31500,63000,3500,13000,4.8x,
+Month 6,732,697,35,0,0%,0,No,50%,17.5,1800,31500,94500,3500,16500,5.7x,
+Month 7,732,697,35,0,0%,0,No,50%,17.5,1800,31500,126000,3500,20000,6.3x,
+Month 8,732,697,35,0,0%,0,No,50%,17.5,1800,31500,157500,3500,23500,6.7x,
+Month 9,732,697,35,0,0%,0,No,50%,17.5,1800,31500,189000,3500,27000,7.0x,
+Month 10,732,697,35,0,0%,0,No,50%,17.5,1800,31500,220500,3500,30500,7.2x,
+Month 11,732,697,35,0,0%,0,No,50%,17.5,1800,31500,252000,3500,34000,7.4x,
+Month 12,732,697,35,0,0%,0,No,50%,17.5,1800,31500,283500,3500,37500,7.6x,Year 1 Complete
+
+INSTRUCTIONS FOR USE:
+1. Update "Total Orders" column monthly with actual WooCommerce order count
+2. "Baseline Orders" auto-updates as rolling 6-month average (before AI launch)
+3. "Raw Lift" = Total Orders - Baseline Orders
+4. Track "Ad Spend % Change" - if >30% increase that month adjust attribution down
+5. "Seasonal Adjustment" = compare to same month prior year if significant variance
+6. "Campaign Active" = Yes/No for major marketing campaigns (exclude those weeks)
+7. "Attribution %" starts at 50% conservative can increase to 70% with confidence
+8. "AI Attributed Orders" = Raw Lift × Attribution % (after adjustments)
+9. "Monthly AI Value" = AI Attributed Orders × $1800 CLV
+10. "Monthly Fee" determined by tier based on AI Attributed Orders
+11. ROI = Cumulative AI Value ÷ Cumulative Fees
+
+ATTRIBUTION ADJUSTMENT EXAMPLES:
+- Ad spend increased 50% this month → Reduce attribution to 35% that month
+- Major sale/campaign running → Exclude those weeks set attribution to 0%
+- January (historically 20% above average) → Reduce raw lift by 20% before attribution
+- Multiple factors → Stack adjustments multiplicatively
+
+TIER REFERENCE:
+0-10 orders = $2000/month
+11-20 orders = $3500/month
+21-30 orders = $5000/month
+31-40 orders = $7000/month
+41+ orders = $10000/month
+
+BONUS TRIGGERS:
+15%+ conversion lift = +$2000 bonus that month
+20%+ conversion lift = +$5000 bonus that month

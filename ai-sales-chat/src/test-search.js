@@ -54,12 +54,12 @@ async function runTests() {
   console.log('Configuration:');
   console.log(`  Supabase URL: ${process.env.SUPABASE_URL}`);
   console.log(`  OpenAI Model: text-embedding-3-large`);
-  console.log(`  Claude Model: claude-sonnet-4-20250514\n`);
+  console.log(`  OpenAI Model: gpt-4o\n`);
 
   // Check environment variables
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY || !process.env.OPENAI_API_KEY || !process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY || !process.env.OPENAI_API_KEY) {
     console.error('❌ Missing required environment variables!');
-    console.error('Required: SUPABASE_URL, SUPABASE_ANON_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY');
+    console.error('Required: SUPABASE_URL, SUPABASE_ANON_KEY, OPENAI_API_KEY');
     process.exit(1);
   }
 
@@ -78,7 +78,7 @@ async function runTests() {
       const intentResult = await classifyIntent(
         test.query,
         [],
-        process.env.ANTHROPIC_API_KEY
+        process.env.OPENAI_API_KEY
       );
 
       console.log(`   Intent: ${intentResult.intent}`);

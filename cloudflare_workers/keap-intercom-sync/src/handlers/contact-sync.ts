@@ -1,16 +1,17 @@
 /**
  * Contact Sync Logic
- * Synchronizes contacts from Keap to Intercom
+ * Bidirectional synchronization between Keap and Intercom
  */
 
 import type { Env, IntercomContact, SyncLog } from '../types';
-import { KeapClient } from '../keap-client';
+import { KeapClient, KeapContact } from '../keap-client';
 import { IntercomClient } from '../intercom-client';
 
 interface SyncResult {
   success: boolean;
   action: 'created' | 'updated' | 'linked' | 'failed';
   intercomContact?: IntercomContact;
+  keapContact?: KeapContact;
   error?: string;
 }
 
@@ -129,6 +130,139 @@ async function logSync(log: SyncLog, env: Env): Promise<void> {
   } catch (error) {
     console.error('Error logging sync:', error);
     // Don't throw - logging failure shouldn't break the sync
+  }
+}
+
+/**
+ * Sync an Intercom contact to Keap
+ * PRIMARY SYNC DIRECTION: Intercom → Keap
+ * This is triggered when a user/contact is created or updated in Intercom
+ */
+export async function syncContactToKeap(
+  intercomContactId: string,
+  email: string,
+  name?: string,
+  phone?: string,
+  keapClient?: KeapClient,
+  intercomClient?: IntercomClient,
+  env?: Env
+): Promise<SyncResult> {
+  try {
+    if (!keapClient || !intercomClient || !env) {
+      throw new Error('Required clients and env not provided');
+    }
+
+    // 1. Fetch full contact details from Intercom if needed
+    console.log(`Processing Intercom contact ${intercomContactId}`);
+
+    if (!email) {
+      console.warn(
+        `Intercom contact ${intercomContactId} has no email, skipping sync`
+      );
+      return {
+        success: false,
+        action: 'failed',
+        error: 'No email address found',
+      };
+    }
+
+    // 2. Search for existing contact in Keap by email
+    console.log(`Searching for contact with email ${email} in Keap`);
+    const existingKeapContact = await keapClient.searchContactByEmail(email);
+
+    let keapContact: KeapContact;
+    let action: 'created' | 'updated' | 'linked';
+
+    if (existingKeapContact) {
+      // Contact exists - update it
+      console.log(`Updating existing Keap contact ${existingKeapContact.id}`);
+
+      const updateData: Record<string, unknown> = {};
+      if (name) updateData.given_name = name.split(' ')[0];
+      if (name && name.includes(' ')) updateData.family_name = name.split(' ').slice(1).join(' ');
+      if (phone) updateData.phone = phone;
+
+      keapContact = await keapClient.updateContact(
+        existingKeapContact.id,
+        updateData
+      );
+      action = 'updated';
+    } else {
+      // Contact doesn't exist - create it
+      console.log(`Creating new Keap contact for ${email}`);
+
+      const createData: Record<string, unknown> = {
+        email_addresses: [{ email, field: 'EMAIL1' }],
+      };
+
+      if (name) {
+        createData.given_name = name.split(' ')[0];
+        if (name.includes(' ')) {
+          createData.family_name = name.split(' ').slice(1).join(' ');
+        }
+      }
+
+      if (phone) {
+        createData.phone_numbers = [{ number: phone, field: 'PHONE1' }];
+      }
+
+      keapContact = await keapClient.createContact(createData);
+      action = 'created';
+    }
+
+    // 3. Link Intercom contact with Keap contact ID
+    console.log(`Linking Intercom contact ${intercomContactId} with Keap contact ${keapContact.id}`);
+    const linkedContact = await intercomClient.linkKeapContact(intercomContactId, keapContact.id.toString());
+    console.log(`✅ Successfully linked! Intercom external_id is now: ${linkedContact.external_id}`);
+
+    // 4. Log the sync to Supabase
+    await logSync(
+      {
+        keap_contact_id: keapContact.id.toString(),
+        intercom_contact_id: intercomContactId,
+        sync_status: 'synced',
+        sync_direction: 'intercom_to_keap',
+        synced_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      env
+    );
+
+    console.log(
+      `Successfully ${action} contact in Keap: ${keapContact.id}`
+    );
+
+    return {
+      success: true,
+      action,
+      keapContact,
+    };
+  } catch (error) {
+    console.error(`Error syncing Intercom contact ${intercomContactId} to Keap:`, error);
+
+    // Log failure to Supabase
+    if (env) {
+      await logSync(
+        {
+          intercom_contact_id: intercomContactId,
+          sync_status: 'failed',
+          sync_direction: 'intercom_to_keap',
+          error_message:
+            error instanceof Error ? error.message : 'Unknown error',
+          synced_at: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        env
+      );
+    }
+
+    return {
+      success: false,
+      action: 'failed',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
   }
 }
 

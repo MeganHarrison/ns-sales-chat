@@ -5,6 +5,8 @@
 
 import type { KeapContact } from './types';
 
+export type { KeapContact };
+
 export class KeapClient {
   private readonly baseUrl = 'https://api.infusionsoft.com/crm/rest/v1';
   private readonly apiKey: string;
@@ -43,6 +45,39 @@ export class KeapClient {
    */
   async getContact(contactId: number): Promise<KeapContact> {
     return this.makeRequest<KeapContact>('GET', `/contacts/${contactId}`);
+  }
+
+  /**
+   * Search for a contact by email in Keap
+   */
+  async searchContactByEmail(email: string): Promise<KeapContact | null> {
+    try {
+      const response = await this.makeRequest<{ contacts: KeapContact[] }>(
+        'GET',
+        `/contacts?email=${encodeURIComponent(email)}`
+      );
+      return response.contacts && response.contacts.length > 0 ? response.contacts[0] : null;
+    } catch (error) {
+      console.error('Error searching contact by email:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Create a new contact in Keap
+   */
+  async createContact(data: Record<string, unknown>): Promise<KeapContact> {
+    return this.makeRequest<KeapContact>('POST', '/contacts', data);
+  }
+
+  /**
+   * Update an existing contact in Keap
+   */
+  async updateContact(
+    contactId: number,
+    data: Record<string, unknown>
+  ): Promise<KeapContact> {
+    return this.makeRequest<KeapContact>('PATCH', `/contacts/${contactId}`, data);
   }
 
   /**

@@ -1,6 +1,6 @@
 /**
  * Nutrition Solutions AI Sales Chat - Main Cloudflare Worker
- * 
+ *
  * This is the main API endpoint that:
  * 1. Receives user messages
  * 2. Manages sessions and conversation state
@@ -9,28 +9,35 @@
  * 5. Progressively builds user profiles
  */
 
-import { classifyIntent, detectObjectionType, calculateEngagementScore } from './intent-classifier.js';
-import { smartRetrieve } from './rag-retriever.js';
-import { matchTestimonial } from './testimonial-matcher.js';
-import { generateResponse, estimateResponseQuality } from './response-generator.js';
+import {
+  classifyIntent,
+  detectObjectionType,
+  calculateEngagementScore,
+} from "./intent-classifier.js";
+import { smartRetrieve } from "./rag-retriever.js";
+import { matchTestimonial } from "./testimonial-matcher.js";
+import {
+  generateResponse,
+  estimateResponseQuality,
+} from "./response-generator.js";
 
 export default {
   async fetch(request, env, ctx) {
     // CORS headers
     const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
     };
 
     // Handle CORS preflight
-    if (request.method === 'OPTIONS') {
+    if (request.method === "OPTIONS") {
       return new Response(null, { headers: corsHeaders });
     }
 
     // Only accept POST
-    if (request.method !== 'POST') {
-      return new Response('Method not allowed', {
+    if (request.method !== "POST") {
+      return new Response("Method not allowed", {
         status: 405,
         headers: corsHeaders,
       });
@@ -41,7 +48,11 @@ export default {
       const { message, session_id } = await request.json();
 
       if (!message || !session_id) {
-        return jsonResponse({ error: 'Missing message or session_id' }, 400, corsHeaders);
+        return jsonResponse(
+          { error: "Missing message or session_id" },
+          400,
+          corsHeaders
+        );
       }
 
       // Initialize Supabase client (using REST API)
@@ -56,9 +67,9 @@ export default {
       let conversation = await getConversation(supabase, session_id);
       if (!conversation) {
         conversation = await createConversation(supabase, session_id);
-        console.log('✓ Created new conversation');
+        console.log("✓ Created new conversation");
       } else {
-        console.log('✓ Retrieved existing conversation');
+        console.log("✓ Retrieved existing conversation");
       }
 
       // STEP 2: Get conversation history
@@ -69,24 +80,29 @@ export default {
       let userProfile = await getUserProfile(supabase, session_id);
       if (!userProfile) {
         userProfile = await createUserProfile(supabase, session_id);
-        console.log('✓ Created new user profile');
+        console.log("✓ Created new user profile");
       } else {
-        console.log('✓ Retrieved user profile');
+        console.log("✓ Retrieved user profile");
       }
 
       // STEP 4: Classify intent
-      console.log('🤖 Classifying intent...');
+      console.log("🤖 Classifying intent...");
       const intentResult = await classifyIntent(
         message,
         history,
-        env.ANTHROPIC_API_KEY
+        env.OPENAI_API_KEY
       );
-      console.log(`✓ Intent: ${intentResult.intent} (confidence: ${intentResult.confidence})`);
+      console.log(
+        `✓ Intent: ${intentResult.intent} (confidence: ${intentResult.confidence})`
+      );
 
       // STEP 5: Retrieve relevant docs if needed
       let retrievedDocs = [];
-      if (intentResult.intent === 'FACTUAL' || intentResult.intent === 'OBJECTION') {
-        console.log('📚 Retrieving knowledge...');
+      if (
+        intentResult.intent === "FACTUAL" ||
+        intentResult.intent === "OBJECTION"
+      ) {
+        console.log("📚 Retrieving knowledge...");
         retrievedDocs = await smartRetrieve(message, intentResult.intent, {
           supabaseUrl: env.SUPABASE_URL,
           supabaseKey: env.SUPABASE_ANON_KEY,
@@ -97,8 +113,11 @@ export default {
 
       // STEP 6: Match testimonial if relevant
       let testimonial = null;
-      if (intentResult.intent === 'OBJECTION' || intentResult.intent === 'EMOTIONAL') {
-        console.log('⭐ Matching testimonial...');
+      if (
+        intentResult.intent === "OBJECTION" ||
+        intentResult.intent === "EMOTIONAL"
+      ) {
+        console.log("⭐ Matching testimonial...");
         testimonial = await matchTestimonial(userProfile, message, {
           supabaseUrl: env.SUPABASE_URL,
           supabaseKey: env.SUPABASE_ANON_KEY,
@@ -111,7 +130,7 @@ export default {
       }
 
       // STEP 7: Generate response
-      console.log('💬 Generating response...');
+      console.log("💬 Generating response...");
       const responseText = await generateResponse(
         {
           userMessage: message,
@@ -122,15 +141,15 @@ export default {
           conversationHistory: history,
           matchedTestimonial: testimonial,
         },
-        env.ANTHROPIC_API_KEY
+        env.OPENAI_API_KEY
       );
-      console.log('✓ Response generated');
+      console.log("✓ Response generated");
 
       // STEP 8: Log messages to database
-      await logMessage(supabase, conversation.id, 'user', message, {
+      await logMessage(supabase, conversation.id, "user", message, {
         intent_detected: intentResult.intent,
         retrieval_used: retrievedDocs.length > 0,
-        documents_retrieved: retrievedDocs.map(d => d.id),
+        documents_retrieved: retrievedDocs.map((d) => d.id),
       });
 
       const responseQuality = estimateResponseQuality(
@@ -139,13 +158,13 @@ export default {
         userProfile
       );
 
-      await logMessage(supabase, conversation.id, 'assistant', responseText, {
+      await logMessage(supabase, conversation.id, "assistant", responseText, {
         retrieval_used: retrievedDocs.length > 0,
-        documents_retrieved: retrievedDocs.map(d => d.id),
+        documents_retrieved: retrievedDocs.map((d) => d.id),
         sentiment_score: responseQuality / 10, // Convert to 0-1 scale
       });
 
-      console.log('✓ Logged messages');
+      console.log("✓ Logged messages");
 
       // STEP 9: Update user profile (progressive profiling)
       await updateUserProfile(
@@ -155,7 +174,7 @@ export default {
         intentResult,
         userProfile
       );
-      console.log('✓ Updated user profile');
+      console.log("✓ Updated user profile");
 
       // STEP 10: Update conversation timestamp
       await updateConversation(supabase, conversation.id);
@@ -172,10 +191,10 @@ export default {
         corsHeaders
       );
     } catch (error) {
-      console.error('❌ Error:', error);
+      console.error("❌ Error:", error);
       return jsonResponse(
         {
-          error: 'Internal server error',
+          error: "Internal server error",
           message: "I'm having a moment. Can you try that again?",
         },
         500,
@@ -190,18 +209,20 @@ export default {
 // =============================================================================
 
 async function callSupabase(supabase, endpoint, options = {}) {
-  const { method = 'GET', body = null, query = {} } = options;
+  const { method = "GET", body = null, query = {} } = options;
 
   const queryString = new URLSearchParams(query).toString();
-  const url = `${supabase.url}/rest/v1/${endpoint}${queryString ? `?${queryString}` : ''}`;
+  const url = `${supabase.url}/rest/v1/${endpoint}${
+    queryString ? `?${queryString}` : ""
+  }`;
 
   const fetchOptions = {
     method,
     headers: {
-      'apikey': supabase.key,
-      'Authorization': `Bearer ${supabase.key}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation',
+      apikey: supabase.key,
+      Authorization: `Bearer ${supabase.key}`,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
     },
   };
 
@@ -220,10 +241,10 @@ async function callSupabase(supabase, endpoint, options = {}) {
 }
 
 async function getConversation(supabase, sessionId) {
-  const data = await callSupabase(supabase, 'conversations', {
+  const data = await callSupabase(supabase, "conversations", {
     query: {
       session_id: `eq.${sessionId}`,
-      select: '*',
+      select: "*",
       limit: 1,
     },
   });
@@ -231,11 +252,11 @@ async function getConversation(supabase, sessionId) {
 }
 
 async function createConversation(supabase, sessionId) {
-  const data = await callSupabase(supabase, 'conversations', {
-    method: 'POST',
+  const data = await callSupabase(supabase, "conversations", {
+    method: "POST",
     body: {
       session_id: sessionId,
-      status: 'active',
+      status: "active",
       started_at: new Date().toISOString(),
       last_message_at: new Date().toISOString(),
     },
@@ -244,28 +265,34 @@ async function createConversation(supabase, sessionId) {
 }
 
 async function updateConversation(supabase, conversationId) {
-  await callSupabase(supabase, 'conversations', {
-    method: 'PATCH',
+  await callSupabase(supabase, "conversations", {
+    method: "PATCH",
     body: { last_message_at: new Date().toISOString() },
     query: { id: `eq.${conversationId}` },
   });
 }
 
 async function getConversationHistory(supabase, conversationId, limit = 10) {
-  const data = await callSupabase(supabase, 'messages', {
+  const data = await callSupabase(supabase, "messages", {
     query: {
       conversation_id: `eq.${conversationId}`,
-      select: 'role,content',
-      order: 'timestamp.asc',
+      select: "role,content",
+      order: "timestamp.asc",
       limit: limit,
     },
   });
   return data || [];
 }
 
-async function logMessage(supabase, conversationId, role, content, metadata = {}) {
-  await callSupabase(supabase, 'messages', {
-    method: 'POST',
+async function logMessage(
+  supabase,
+  conversationId,
+  role,
+  content,
+  metadata = {}
+) {
+  await callSupabase(supabase, "messages", {
+    method: "POST",
     body: {
       conversation_id: conversationId,
       role,
@@ -277,10 +304,10 @@ async function logMessage(supabase, conversationId, role, content, metadata = {}
 }
 
 async function getUserProfile(supabase, sessionId) {
-  const data = await callSupabase(supabase, 'user_profiles', {
+  const data = await callSupabase(supabase, "user_profiles", {
     query: {
       session_id: `eq.${sessionId}`,
-      select: '*',
+      select: "*",
       limit: 1,
     },
   });
@@ -288,11 +315,11 @@ async function getUserProfile(supabase, sessionId) {
 }
 
 async function createUserProfile(supabase, sessionId) {
-  const data = await callSupabase(supabase, 'user_profiles', {
-    method: 'POST',
+  const data = await callSupabase(supabase, "user_profiles", {
+    method: "POST",
     body: {
       session_id: sessionId,
-      stage_of_awareness: 'unaware',
+      stage_of_awareness: "unaware",
       decision_readiness: 5,
       engagement_score: 5,
       objections_raised: [],
@@ -303,7 +330,13 @@ async function createUserProfile(supabase, sessionId) {
   return data?.[0];
 }
 
-async function updateUserProfile(supabase, sessionId, message, intentResult, currentProfile) {
+async function updateUserProfile(
+  supabase,
+  sessionId,
+  message,
+  intentResult,
+  currentProfile
+) {
   // Extract objections if present
   const objections = detectObjectionType(message);
   const allObjections = [
@@ -314,20 +347,23 @@ async function updateUserProfile(supabase, sessionId, message, intentResult, cur
   const engagement = calculateEngagementScore(message);
 
   // Determine stage of awareness
-  let stage = currentProfile.stage_of_awareness || 'unaware';
-  if (intentResult.intent === 'READY_TO_BUY') stage = 'most_aware';
-  else if (intentResult.intent === 'OBJECTION') stage = 'solution_aware';
-  else if (intentResult.intent === 'FACTUAL') stage = 'product_aware';
-  else if (intentResult.intent === 'EMOTIONAL') stage = 'problem_aware';
+  let stage = currentProfile.stage_of_awareness || "unaware";
+  if (intentResult.intent === "READY_TO_BUY") stage = "most_aware";
+  else if (intentResult.intent === "OBJECTION") stage = "solution_aware";
+  else if (intentResult.intent === "FACTUAL") stage = "product_aware";
+  else if (intentResult.intent === "EMOTIONAL") stage = "problem_aware";
 
   // Update decision readiness based on intent and urgency
   let readiness = currentProfile.decision_readiness || 5;
-  if (intentResult.intent === 'READY_TO_BUY') readiness = Math.min(10, readiness + 2);
-  else if (intentResult.urgency === 'high') readiness = Math.min(10, readiness + 1);
-  else if (intentResult.intent === 'OBJECTION') readiness = Math.max(1, readiness - 1);
+  if (intentResult.intent === "READY_TO_BUY")
+    readiness = Math.min(10, readiness + 2);
+  else if (intentResult.urgency === "high")
+    readiness = Math.min(10, readiness + 1);
+  else if (intentResult.intent === "OBJECTION")
+    readiness = Math.max(1, readiness - 1);
 
-  await callSupabase(supabase, 'user_profiles', {
-    method: 'PATCH',
+  await callSupabase(supabase, "user_profiles", {
+    method: "PATCH",
     body: {
       objections_raised: allObjections,
       stage_of_awareness: stage,
@@ -347,7 +383,7 @@ function jsonResponse(data, status = 200, additionalHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...additionalHeaders,
     },
   });

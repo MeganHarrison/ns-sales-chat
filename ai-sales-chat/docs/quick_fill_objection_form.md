@@ -1,8 +1,6 @@
 # QUICK-FILL OBJECTION FORM
 ## Complete this first, then we'll expand into full scripts
 
----
-
 ## 1. PRICING DETAILS
 
 **What do you charge?**

@@ -292,7 +292,7 @@ function buildSemanticQuery(userMessage, userProfile) {
 }
 
 /**
- * Helper: Format testimonial for Claude context
+ * Helper: Format testimonial for AI context
  */
 export function formatTestimonialForContext(testimonial) {
   if (!testimonial) return '';

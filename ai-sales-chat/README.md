@@ -1,7 +1,7 @@
 # Nutrition Solutions AI Sales Chat
 
 Production-ready AI sales chat system built with:
-- **Claude Sonnet 4** (Anthropic) for intelligent responses
+- **OpenAI GPT-4** for intelligent responses and intent classification
 - **OpenAI Embeddings** for semantic search
 - **Supabase + pgvector** for knowledge base and vector search
 - **Cloudflare Workers** for edge deployment
@@ -53,10 +53,9 @@ User Response
 ### Prerequisites
 
 1. **Supabase Account** - https://supabase.com (free tier works)
-2. **OpenAI API Key** - https://platform.openai.com
-3. **Anthropic API Key** - https://console.anthropic.com
-4. **Cloudflare Account** - https://dash.cloudflare.com
-5. **Node.js 18+**
+2. **OpenAI API Key** - https://platform.openai.com (for both AI and embeddings)
+3. **Cloudflare Account** - https://dash.cloudflare.com
+4. **Node.js 18+**
 
 ### Step 1: Clone & Install
 
@@ -78,7 +77,6 @@ cp .env.example .env
 # SUPABASE_SERVICE_ROLE_KEY=your-service-role-key (for data ingestion)
 # SUPABASE_ANON_KEY=your-anon-key (for runtime)
 # OPENAI_API_KEY=sk-...
-# ANTHROPIC_API_KEY=sk-ant-...
 ```
 
 ⚠️ **Important**: Use `SUPABASE_SERVICE_ROLE_KEY` for the ingestion script (it needs admin access), but use `SUPABASE_ANON_KEY` in the Cloudflare Worker (safer).
@@ -162,7 +160,6 @@ npx wrangler login
 npx wrangler secret put SUPABASE_URL
 npx wrangler secret put SUPABASE_ANON_KEY
 npx wrangler secret put OPENAI_API_KEY
-npx wrangler secret put ANTHROPIC_API_KEY
 
 # Deploy
 npm run deploy
@@ -237,7 +234,6 @@ compatibility_date = "2024-01-01"
 # - SUPABASE_URL
 # - SUPABASE_ANON_KEY
 # - OPENAI_API_KEY
-# - ANTHROPIC_API_KEY
 ```
 
 ### Environment Variables
@@ -247,8 +243,7 @@ compatibility_date = "2024-01-01"
 | `SUPABASE_URL` | Supabase project URL | All |
 | `SUPABASE_SERVICE_ROLE_KEY` | Admin access for data ingestion | Scripts only |
 | `SUPABASE_ANON_KEY` | Runtime access with RLS | Cloudflare Worker |
-| `OPENAI_API_KEY` | For embeddings (text-embedding-3-large) | All |
-| `ANTHROPIC_API_KEY` | For Claude Sonnet 4 | All |
+| `OPENAI_API_KEY` | For GPT-4 responses and embeddings | All |
 
 ## 📊 Database Schema
 
@@ -369,9 +364,8 @@ Based on 1,000 conversations/month (avg 5 messages each = 5,000 messages):
 |---------|------|
 | Supabase (Pro) | $25 |
 | Cloudflare Workers | $5-10 |
-| OpenAI (Embeddings) | $5-15 |
-| Anthropic (Claude) | $50-150 |
-| **Total** | **$85-200/month** |
+| OpenAI (GPT-4 + Embeddings) | $60-180 |
+| **Total** | **$90-215/month** |
 
 **ROI**: If this converts just 1 extra client/month ($297), pays for itself 1.5-3.5x.
 
@@ -413,9 +407,9 @@ For higher volume (10,000 conversations/month):
 **Cause**: Rate limit exceeded
 **Fix**: Add delay between requests or upgrade OpenAI tier
 
-### "Claude API error: 529"
+### "OpenAI API error: 503"
 
-**Cause**: Anthropic overloaded
+**Cause**: OpenAI service temporarily unavailable
 **Fix**: Implement retry logic with exponential backoff
 
 ### "Supabase RPC error"

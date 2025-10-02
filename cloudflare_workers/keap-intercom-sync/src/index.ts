@@ -1,6 +1,7 @@
 /**
- * Keap-Intercom Contact Sync Worker
- * Bidirectional sync between Keap and Intercom contacts
+ * Intercom-Keap Contact Sync Worker
+ * PRIMARY: Sync Intercom users → Keap when created in Intercom
+ * SECONDARY: Manual sync from Keap → Intercom (legacy support)
  */
 
 import type { Env } from './types';
@@ -8,9 +9,10 @@ import {
   handleKeapWebhook,
   handleWebhookVerification,
 } from './handlers/webhook-handler';
+import { handleIntercomWebhook } from './handlers/intercom-webhook-handler';
 import { KeapClient } from './keap-client';
 import { IntercomClient } from './intercom-client';
-import { syncContactToIntercom, batchSyncContacts } from './handlers/contact-sync';
+import { syncContactToIntercom, syncContactToKeap, batchSyncContacts } from './handlers/contact-sync';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -29,7 +31,16 @@ export default {
     }
 
     try {
-      // Route: Keap webhook endpoint
+      // Route: Intercom webhook endpoint (PRIMARY)
+      if (url.pathname === '/webhook/intercom' && request.method === 'POST') {
+        const response = await handleIntercomWebhook(request, env);
+        return new Response(response.body, {
+          status: response.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Route: Keap webhook endpoint (LEGACY - for manual sync)
       if (url.pathname === '/webhook/keap' && request.method === 'POST') {
         const response = await handleKeapWebhook(request, env);
         return new Response(response.body, {
@@ -127,9 +138,10 @@ export default {
         JSON.stringify({
           error: 'Not found',
           availableEndpoints: [
-            'POST /webhook/keap - Keap webhook handler',
-            'POST /sync/contact - Manual single contact sync',
-            'POST /sync/batch - Batch contact sync',
+            'POST /webhook/intercom - Intercom webhook handler (PRIMARY - syncs Intercom → Keap)',
+            'POST /webhook/keap - Keap webhook handler (LEGACY - syncs Keap → Intercom)',
+            'POST /sync/contact - Manual single contact sync (Keap → Intercom)',
+            'POST /sync/batch - Batch contact sync (Keap → Intercom)',
             'GET /health - Health check',
           ],
         }),

@@ -1,7 +1,7 @@
 /**
  * Response Generator Module
- * 
- * Generates the final AI response using Claude with:
+ *
+ * Generates the final AI response using OpenAI with:
  * - Intent-aware system prompts
  * - Retrieved knowledge (RAG)
  * - Matched testimonials
@@ -19,13 +19,13 @@ import {
 } from './testimonial-matcher.js';
 
 /**
- * Generate response using Claude with full context
- * 
+ * Generate response using OpenAI with full context
+ *
  * @param {Object} context - All context needed for response
- * @param {string} anthropicApiKey - Anthropic API key
+ * @param {string} openaiApiKey - OpenAI API key
  * @returns {string} - Generated response
  */
-export async function generateResponse(context, anthropicApiKey) {
+export async function generateResponse(context, openaiApiKey) {
   const {
     userMessage,
     intent,
@@ -55,29 +55,39 @@ export async function generateResponse(context, anthropicApiKey) {
   ];
 
   try {
-    // Call Claude API
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Build messages array for OpenAI format
+    const openAIMessages = [
+      {
+        role: 'system',
+        content: systemPrompt
+      },
+      ...messages.map(msg => ({
+        role: msg.role === 'assistant' ? 'assistant' : 'user',
+        content: msg.content
+      }))
+    ];
+
+    // Call OpenAI API
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'x-api-key': anthropicApiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1500,
+        model: 'gpt-4o',
+        messages: openAIMessages,
         temperature: 0.7, // Balanced creativity
-        system: systemPrompt,
-        messages: messages,
+        max_tokens: 1500,
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Claude API error: ${response.status} ${response.statusText}`);
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
-    const responseText = data.content[0].text;
+    const responseText = data.choices[0].message.content;
 
     // Add CTA based on stage and intent
     const finalResponse = addSmartCTA(
